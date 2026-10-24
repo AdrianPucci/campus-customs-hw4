@@ -29,6 +29,7 @@ In two terminals:
 - [ ] Harness Models section (Portkey, `gpt-6-luna`, structured `ShopReply`, request cap).
 - [x] Save chat history to `chat_messages` for logged-in shoppers (Problem 8, done).
 - [ ] Harness: document chat history + `ShopperDeps` / `get_shopper_profile` (Models / Safety sections).
+- [ ] **REMIND USER (asked Prompt 57): document in the harness** the descriptor search: `find_products` filters (category, color/color_anywhere, min/max price, sort_by), `catalogue_overview()`, and page context (`viewing_product_id` → "this" = open product). The Prompt 55 harness edit failed because the file was open elsewhere.
 - [ ] Optional: a "New chat" button that clears a shopper's saved history.
 - [ ] Test-question script for the chatbot (suggested).
 - [ ] Rate limit on `/api/chat` to protect the Portkey bill (suggested).

@@ -556,7 +556,7 @@ can we make sure there enough context for the page that if someone asks for a de
 
 **Assistant response:**
 
-Checked the data first: 22 colors, mostly navy, white and gray, no pink (closest is one "dusty coral"), and 22 messy `garment_type` labels. Added three things. (1) **Page context:** the chat sends the open product page (`viewing_product_id` in `ChatRequest`, put in `ShopperDeps`), and the agent's dynamic prompt names that product so "this" / "it" make sense. (2) **Descriptor search** in `backend/tools.py`: `find_products` now takes category (6 clean categories made from the messy labels), color (garment's main color, or `color_anywhere` for print colors; grey = gray, blue matches navy blue), min/max price and `sort_by` (relevance, price_low, price_high, most_in_stock, name), and returns main_color, accent_colors and total_in_stock. (3) **New tool `catalogue_overview()`**: categories with counts and price ranges, plus every color with counts, so the agent offers the closest real color instead of inventing one. New models: `Category`, `SortBy`, `CatalogueOverview`, `CountAndPrices`. Added a "Descriptor questions" section to `prompts/prompt.md` (one colorway per item, the color fallback steps, sorting words, only claim features in the data) and updated the harness Tools table. Tested: "do you have this in pink?" on the Yale Mom Hoodie page gave "navy, not pink; closest is dusty coral" (Big Yale Tri Blend T, $32). "Cheapest hoodie" gave $45 (2 items). "Cream crewnecks" gave 2 cream items. "Gray shirts with red on them" gave 2 correct tees. "Is this one a zip-up?" on the Champion Full Zip Hood gave yes. Live site, on the Ice Hockey hoodie page: "does this come in gray?" gave "navy; here's the gray Yale Sports Hoodie Hockey". All facts checked against the database.
+Checked the data first: 22 colors, mostly navy, white and gray, no pink (closest is one "dusty coral"), and 22 messy `garment_type` labels. Added three things. (1) **Page context:** the chat sends the open product page (`viewing_product_id` in `ChatRequest`, put in `ShopperDeps`), and the agent's dynamic prompt names that product so "this" / "it" make sense. (2) **Descriptor search** in `backend/tools.py`: `find_products` now takes category (6 clean categories made from the messy labels), color (garment's main color, or `color_anywhere` for print colors; grey = gray, blue matches navy blue), min/max price and `sort_by` (relevance, price_low, price_high, most_in_stock, name), and returns main_color, accent_colors and total_in_stock. (3) **New tool `catalogue_overview()`**: categories with counts and price ranges, plus every color with counts, so the agent offers the closest real color instead of inventing one. New models: `Category`, `SortBy`, `CatalogueOverview`, `CountAndPrices`. Added a "Descriptor questions" section to `prompts/prompt.md` (one colorway per item, the color fallback steps, sorting words, only claim features in the data) and tried to update the harness Tools table. Tested: "do you have this in pink?" on the Yale Mom Hoodie page gave "navy, not pink; closest is dusty coral" (Big Yale Tri Blend T, $32). "Cheapest hoodie" gave $45 (2 items). "Cream crewnecks" gave 2 cream items. "Gray shirts with red on them" gave 2 correct tees. "Is this one a zip-up?" on the Champion Full Zip Hood gave yes. Live site, on the Ice Hockey hoodie page: "does this come in gray?" gave "navy; here's the gray Yale Sports Hoodie Hockey". All facts checked against the database.
 
 ## Prompt 56
 
@@ -567,3 +567,15 @@ One more item on this. We don't need to keep chats for guests just logged in cus
 **Assistant response:**
 
 Confirmed it already works that way: guest chats are never written to `chat_messages` (tested in Problem 8, where a guest chat returned `saved: false`). A guest's chat exists only in the open browser tab and is gone on reload; only logged-in customers' chats are saved and reloaded.
+
+**Later correction (Prompt 57):** The harness Tools table update in Prompt 55 did not save (`output/harness.md` was locked, open in another program). Left for the user to document later.
+
+## Prompt 57
+
+**User prompt:**
+
+Remind me to document in the harness later.
+
+**Assistant response:**
+
+Added harness reminders to the to-do list in `CLAUDE.md`: the descriptor search (filters, sorting, `catalogue_overview`, page context), chat history, and `ShopperDeps`. Told the user the Prompt 55 harness edit hadn't saved because the file was open in another program.
