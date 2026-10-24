@@ -1011,3 +1011,13 @@ lets change the background color of the bottom piece to black
 **Assistant response:**
 
 Changed the slanted footer band to black (new `--footer-bg: #000000` token in `frontend/src/index.css`), keeping the orange diagonal stripes and the graffiti tag. The area below the footer on short pages is black too, so the band continues. Checked in the browser, committed and pushed to the same repo.
+
+## Prompt 101
+
+**User prompt:**
+
+I don't love it. Let
+
+**Assistant response:**
+
+The message was cut off after "Let", so asked what to change instead of guessing; offered going back to Yale blue or a softer near-black.
