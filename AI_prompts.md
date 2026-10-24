@@ -931,3 +931,13 @@ It worked! thank you! Cheers
 **Assistant response:**
 
 Congratulated the user. Logged and committed locally only, not pushed, so the submitted repo stays as it was at the deadline.
+
+## Prompt 93
+
+**User prompt:**
+
+just curious, could you take my graphiti background and change it enough that you can use it?
+
+**Assistant response:**
+
+Explained that the pasted image was never saved as a file, and that changing someone else's artwork does not make it free to use: it would still be a derivative of the artist's work. Offered options: get the artist's permission, use it as a class-project photo with credit, or have an original graffiti-style background made in the same palette, since a style and colors are not owned. Committed locally, not pushed.
