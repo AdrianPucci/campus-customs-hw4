@@ -4,18 +4,20 @@ Run from the backend folder:
     cd backend
     uvicorn main:app --reload --port 8000
 """
+import json
 import logging
 
 from fastapi import Cookie, FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic_ai.exceptions import UsageLimitExceeded
 
-from agent import MAX_HISTORY_TURNS, ShopperDeps, ask_shop_agent
+from agent import MAX_HISTORY_TURNS, ShopperDeps, ask_shop_agent, stream_shop_agent
 from auth import SESSIONS
 from auth import router as auth_router
 from chat_history import history_as_turns, load_history, save_message
 from db import DATA_DIR, get_db
-from models import ChatHistoryResponse, ChatRequest, ChatResponse
+from models import ChatHistoryResponse, ChatRequest, ChatResponse, ShopReply
 from tools import get_product_details, load_products, to_card
 
 log = logging.getLogger("campus_customs")
@@ -54,31 +56,71 @@ def current_shopper(cc_session: str | None) -> ShopperDeps:
     return ShopperDeps(user_id=row["id"], first_name=row["first_name"], last_name=row["last_name"], email=row["email"])
 
 
-@app.post("/api/chat")
-async def chat(body: ChatRequest, cc_session: str | None = Cookie(default=None)) -> ChatResponse:
+def finish_turn(shopper: ShopperDeps, message: str, answer: ShopReply) -> ChatResponse:
+    """Turn the agent's answer into the response: real product cards, saved if logged in."""
+    # Show only real products: drop any id the model made up, keep its order, no repeats.
+    ids = list(dict.fromkeys(answer.product_ids))
+    cards = [to_card(p) for p in load_products(ids)] if ids else []
+    # Saved only after a successful answer, so a failed request leaves no half-conversation.
+    # Guests are never saved.
+    if shopper.logged_in:
+        save_message(shopper.user_id, "user", message)
+        save_message(shopper.user_id, "assistant", answer.message, cards)
+    return ChatResponse(reply=answer.message, products=cards, saved=shopper.logged_in)
+
+
+def start_turn(body: ChatRequest, cc_session: str | None) -> tuple[ShopperDeps, list]:
     shopper = current_shopper(cc_session)
     shopper.viewing_product_id = body.viewing_product_id
     # Logged in: the saved history in the database is the context (it survives reloads and
     # can't be edited by the browser). Guests: whatever the chat panel sent.
     history = history_as_turns(shopper.user_id, MAX_HISTORY_TURNS) if shopper.logged_in else body.history
+    return shopper, history
 
+
+def ndjson(obj: dict) -> str:
+    """One line of newline-delimited JSON."""
+    return json.dumps(obj) + "\n"
+
+
+TOO_LONG = "Sorry, that one took me too long. Could you ask it a simpler way?"
+UNAVAILABLE = "The assistant is unavailable right now. Please try again."
+
+
+@app.post("/api/chat")
+async def chat(body: ChatRequest, cc_session: str | None = Cookie(default=None)) -> ChatResponse:
+    shopper, history = start_turn(body, cc_session)
     try:
         answer = await ask_shop_agent(body.message, history, shopper)
     except UsageLimitExceeded:
-        return ChatResponse(reply="Sorry, that one took me too long. Could you ask it a simpler way?", products=[])
+        return ChatResponse(reply=TOO_LONG, products=[])
     except Exception:
         log.exception("Chat agent failed")
-        raise HTTPException(status_code=502, detail="The assistant is unavailable right now. Please try again.")
+        raise HTTPException(status_code=502, detail=UNAVAILABLE)
+    return finish_turn(shopper, body.message, answer)
 
-    # Show only real products: drop any id the model made up, keep its order, no repeats.
-    ids = list(dict.fromkeys(answer.product_ids))
-    cards = [to_card(p) for p in load_products(ids)] if ids else []
 
-    # Saved only after a successful answer, so a failed request leaves no half-conversation.
-    if shopper.logged_in:
-        save_message(shopper.user_id, "user", body.message)
-        save_message(shopper.user_id, "assistant", answer.message, cards)
-    return ChatResponse(reply=answer.message, products=cards, saved=shopper.logged_in)
+@app.post("/api/chat/stream")
+async def chat_stream(body: ChatRequest, cc_session: str | None = Cookie(default=None)) -> StreamingResponse:
+    """Like /api/chat, but sends one JSON line per step as it happens (NDJSON):
+    {"type": "status", "text": "📦 Checking stock by size…"} ... then {"type": "done", ...ChatResponse}."""
+    shopper, history = start_turn(body, cc_session)
+
+    async def lines():
+        try:
+            async for item in stream_shop_agent(body.message, history, shopper):
+                if isinstance(item, ShopReply):
+                    done = finish_turn(shopper, body.message, item)
+                    yield ndjson({"type": "done", **done.model_dump()})
+                else:
+                    yield ndjson({"type": "status", "text": item})
+        except UsageLimitExceeded:
+            yield ndjson({"type": "done", **ChatResponse(reply=TOO_LONG).model_dump()})
+        except Exception:
+            log.exception("Chat agent failed")
+            yield ndjson({"type": "error", "detail": UNAVAILABLE})
+
+    return StreamingResponse(lines(), media_type="application/x-ndjson")
 
 
 @app.get("/api/chat/history")

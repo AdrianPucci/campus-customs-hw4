@@ -629,3 +629,33 @@ yes and we need the chatbot open
 **Assistant response:**
 
 Opened the chat panel in the Browser pane. The pane is phone-width right now, which shows a usability issue: on a phone the open chat covers almost the whole page, so cards the agent finds are hidden behind it. Listed this with other observations for brainstorming. Nothing changed.
+
+## Prompt 63
+
+**User prompt:**
+
+Awesome list. Also noticed this on the phone and the suggestions. Here's what I want to do: 1. Let fix the isuse so the chat is smaller sized on the phone and in smaller viewing panes over the shop page, It can be significantly smaller and right/ lower page or screen justified. 2. I like the suggestion boxes for the chat. Lets do gift ideas, and a seasonal option that changes depending on the time of the year. Also can we add an option that comes up pending which sports are playing during the season?  (football in fall, baseball in the summer, for a start)?  6. Let's also fix the what the chat is doing, and give it a nice little message following what its doing that says something about getting results soon and an emoji
+
+**Assistant response:**
+
+(1) **Smaller chat on phones and small panes:** a CSS rule for screens under 700 px wide or tall makes the panel a compact 280x340 box in the lower right with smaller text and button. On a 427x732 phone view it now covers 30% of the screen instead of nearly all of it, so the shop and its cards stay visible. (2) **Suggestion chips** (`frontend/src/chat/suggestions.ts`) show under the greeting until the shopper asks something: 🎁 Gift ideas; a seasonal chip (❄️ winter, 🌸 spring, ☀️ summer tees, 🍂 fall layers, 🏟️ The Game in November); and the Yale sport in season (🏈 football Sep-Nov, 🏒 hockey Dec-Feb, ⚾ baseball Mar-Aug). Checked all 12 months. Tapping a chip sends its question. (6) **Live "what the chat is doing":** new `POST /api/chat/stream` in `main.py` sends one JSON line per step as the agent works (`stream_shop_agent` in `agent.py`, using PydanticAI's `run_stream_events`): 💭 Thinking, 🔎 Searching the catalogue, 📦 Checking stock by size, 👕 Reading the product details, 🎨 Looking over all our styles and colors, ✍️ Writing your answer. Under each step the chat shows "Hang tight, your results are almost here! 🐾". `api/chat.ts` reads the stream. Saving and cards are shared with `/api/chat` (`finish_turn`). Fixed two bugs found along the way: newline strings broken by a script, and a wrong import path for `AgentRunResultEvent`. Tested at phone width: tapping 🏈 Football season showed Thinking, then Searching the catalogue, then Writing your answer, and returned the 3 football tees at $32, which is every football item in the database.
+
+## Prompt 64
+
+**User prompt:**
+
+Also I would like to fix the the back end list we discussed / that you brought up.
+
+**Assistant response:**
+
+Queued after Prompt 63: chat rate limit, test-question script, smarter model for hard questions, expanded Safety section.
+
+## Prompt 65
+
+**User prompt:**
+
+can you send the ink to the browser so I can email to myself
+
+**Assistant response:**
+
+Explained that the shop's link (http://localhost:5173) only works on this computer, because "localhost" means "this machine", so an emailed copy won't open on a phone or another computer. Offered to make it reachable from a phone on the same Wi-Fi (start Vite with `--host` and use the computer's network address) and asked which link they meant.

@@ -14,14 +14,17 @@ export async function loadChatHistory(): Promise<ChatMessage[]> {
   return data.messages as ChatMessage[]
 }
 
-// Sends the message plus earlier turns to the backend's PydanticAI agent.
+// Sends the message plus earlier turns to the backend's PydanticAI agent and calls
+// onStatus with each step the agent takes ("📦 Checking stock by size…") as it happens.
+// The backend answers with one JSON object per line: status lines, then a "done" line.
 // The session cookie goes along automatically, so the agent knows who is logged in.
 export async function sendChatMessage(
   message: string,
   history: ChatMessage[],
   viewingProductId: string | null = null, // product page that's open, so "this" makes sense
+  onStatus: (text: string) => void = () => {},
 ): Promise<ChatMessage> {
-  const res = await fetch('/api/chat', {
+  const res = await fetch('/api/chat/stream', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -30,7 +33,27 @@ export async function sendChatMessage(
       viewing_product_id: viewingProductId,
     }),
   })
-  const data = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'The assistant is unavailable right now.')
-  return { role: 'assistant', content: data.reply, products: data.products }
+  if (!res.ok || !res.body) {
+    const data = await res.json().catch(() => ({}))
+    throw new Error(typeof data.detail === 'string' ? data.detail : 'The assistant is unavailable right now.')
+  }
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  for (;;) {
+    const { value, done } = await reader.read()
+    buffer += decoder.decode(value, { stream: !done })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? '' // keep a partial last line until the rest arrives
+    for (const line of lines) {
+      if (!line.trim()) continue
+      const event = JSON.parse(line)
+      if (event.type === 'status') onStatus(event.text)
+      else if (event.type === 'done') return { role: 'assistant', content: event.reply, products: event.products }
+      else if (event.type === 'error') throw new Error(event.detail)
+    }
+    if (done) break
+  }
+  throw new Error('The assistant stopped before answering. Please try again.')
 }

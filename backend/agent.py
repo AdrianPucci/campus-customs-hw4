@@ -1,12 +1,16 @@
 """The shop chatbot: a PydanticAI agent whose model calls go through Portkey."""
 import os
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from pathlib import Path
 
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
-from pydantic_ai import Agent, RunContext
-from pydantic_ai.messages import ModelMessage, ModelRequest, ModelResponse, TextPart, UserPromptPart
+from pydantic_ai import Agent, AgentRunResultEvent, RunContext
+from pydantic_ai.messages import (
+    FunctionToolCallEvent, ModelMessage, ModelRequest, ModelResponse, TextPart,
+    UserPromptPart,
+)
 from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.usage import UsageLimits
@@ -173,3 +177,32 @@ async def ask_shop_agent(message: str, history: list[ChatTurn], shopper: Shopper
         usage_limits=UsageLimits(request_limit=MAX_MODEL_REQUESTS),
     )
     return result.output
+
+
+# What the chat panel shows while each tool runs (the agent's real steps, not a timer).
+TOOL_STATUS = {
+    "find_products": "🔎 Searching the catalogue…",
+    "get_product_info": "👕 Reading the product details…",
+    "check_stock": "📦 Checking stock by size…",
+    "catalogue_overview": "🎨 Looking over all our styles and colors…",
+    "get_shopper_profile": "🙋 Checking your account…",
+}
+
+
+async def stream_shop_agent(
+    message: str, history: list[ChatTurn], shopper: ShopperDeps
+) -> AsyncIterator[str | ShopReply]:
+    """Same as ask_shop_agent, but yields a status line as each tool starts, then the ShopReply."""
+    yield "💭 Thinking about your question…"
+    async with shop_agent.run_stream_events(
+        message,
+        message_history=to_model_history(history),
+        deps=shopper,
+        usage_limits=UsageLimits(request_limit=MAX_MODEL_REQUESTS),
+    ) as events:
+        async for event in events:
+            if isinstance(event, FunctionToolCallEvent):
+                yield TOOL_STATUS.get(event.part.tool_name, "⚙️ Working on it…")
+            elif isinstance(event, AgentRunResultEvent):
+                yield "✍️ Writing your answer…"
+                yield event.result.output

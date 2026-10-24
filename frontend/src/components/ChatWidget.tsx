@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { loadChatHistory, sendChatMessage, type ChatMessage } from '../api/chat'
 import { useAuth } from '../auth/AuthContext'
 import { useChatResults } from '../chat/ChatResultsContext'
+import { chatSuggestions } from '../chat/suggestions'
 
 // More matches than this are shown only on the page, not squeezed into the chat panel.
 const MAX_CARDS_IN_PANEL = 4
@@ -33,6 +34,8 @@ export default function ChatWidget() {
   }, [user])
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
+  const [status, setStatus] = useState('') // the agent's current step, streamed from the backend
+  const [askedThisVisit, setAskedThisVisit] = useState(false) // hides the suggestion chips once used
   const endRef = useRef<HTMLDivElement>(null)
   const { showResults } = useChatResults()
   const { pathname } = useLocation()
@@ -42,19 +45,25 @@ export default function ChatWidget() {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, open])
 
-  async function handleSubmit(e: FormEvent) {
+  function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    const text = input.trim()
+    send(input)
+  }
+
+  async function send(raw: string) {
+    const text = raw.trim()
     if (!text || sending) return
 
     const userMessage: ChatMessage = { role: 'user', content: text }
     setMessages((prev) => [...prev, userMessage])
     setInput('')
     setSending(true)
+    setAskedThisVisit(true)
+    setStatus('💭 Thinking about your question…')
     try {
       // The greeting is just for the screen; the agent only needs the real conversation.
       const viewing = pathname.startsWith('/products/') ? decodeURIComponent(pathname.slice('/products/'.length)) : null
-      const reply = await sendChatMessage(text, messages.slice(1), viewing)
+      const reply = await sendChatMessage(text, messages.slice(1), viewing, setStatus)
       setMessages((prev) => [...prev, reply])
       // Matching items also appear as full cards on the page itself.
       if (reply.products?.length) showResults({ question: text, products: reply.products, askedOn: pathname })
@@ -62,6 +71,7 @@ export default function ChatWidget() {
       setMessages((prev) => [...prev, { role: 'assistant', content: `Sorry, ${(err as Error).message}` }])
     } finally {
       setSending(false)
+      setStatus('')
     }
   }
 
@@ -100,7 +110,21 @@ export default function ChatWidget() {
                 )}
               </div>
             ))}
-            {sending && <div className="chat-bubble assistant muted">Typing…</div>}
+            {!askedThisVisit && !sending && (
+              <div className="chat-suggestions" aria-label="Suggested questions">
+                {chatSuggestions().map((s) => (
+                  <button key={s.label} type="button" className="chat-chip" onClick={() => send(s.question)}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {sending && (
+              <div className="chat-bubble assistant chat-status" role="status" aria-live="polite">
+                <span className="chat-status-step">{status}</span>
+                <span className="chat-status-soon">Hang tight, your results are almost here! 🐾</span>
+              </div>
+            )}
             <div ref={endRef} />
           </div>
 
