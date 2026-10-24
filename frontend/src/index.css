@@ -691,10 +691,11 @@ h1 {
   gap: 0.75rem;
 }
 
+/* White with Yale-blue text and outline: easy to spot on white pages and on the blue footer. */
 .chat-toggle {
-  background: var(--yale-blue);
-  color: #fff;
-  border: none;
+  background: #fff;
+  color: var(--yale-blue);
+  border: 2px solid var(--yale-blue);
   border-radius: 999px;
   min-width: 64px;
   height: 56px;
@@ -704,6 +705,10 @@ h1 {
   font-size: 1rem;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.chat-toggle:hover {
+  background: #e8eef5;
 }
 
 .chat-panel {

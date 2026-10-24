@@ -1031,3 +1031,13 @@ Let's go back to the Yale blue footer.
 **Assistant response:**
 
 Set `--footer-bg` back to Yale blue (one token in `frontend/src/index.css`); the area below the footer follows it. Checked in the browser, committed and pushed to the same repo.
+
+## Prompt 103
+
+**User prompt:**
+
+can you make the chat button white and blue text so its easier to see?
+
+**Assistant response:**
+
+Made the floating chat button white with Yale-blue text and a 2 px Yale-blue outline (plus a light blue hover) in `frontend/src/index.css`, so it stands out on white pages and over the blue footer. Checked in the browser, committed and pushed to the same repo.
