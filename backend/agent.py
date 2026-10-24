@@ -11,8 +11,8 @@ from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.usage import UsageLimits
 
-from models import ChatTurn, ShopReply
-from tools import get_product_details, search_products
+from models import ChatTurn, ProductInfo, ProductSummary, ShopReply, StockReport
+from tools import product_info, search_products, stock_report
 
 BACKEND_DIR = Path(__file__).resolve().parent
 load_dotenv(BACKEND_DIR.parent / ".env")
@@ -59,25 +59,35 @@ def shopper_name(ctx: RunContext[ShopperDeps]) -> str:
     return "The shopper is not logged in."
 
 
+# ---------- Tools: every answer about products comes from campus_customs.db ----------
+
+NOT_FOUND = "No product matches {key!r}. Use find_products first to get a valid product_id."
+
+
 @shop_agent.tool_plain
-def find_products(query: str, max_price: float | None = None) -> list[dict]:
+def find_products(query: str, max_price: float | None = None) -> list[ProductSummary]:
     """Search the catalogue. query: product words only, e.g. "navy hockey hoodie" or "mom" (leave sizes out).
     max_price: only items at or under this price.
-    Returns up to 8 matches with price and sizes_in_stock. Sold-out sizes are simply missing from
-    sizes_in_stock; the product is still one we carry."""
+    Returns up to 8 matches with product_id, price and sizes_in_stock. Sold-out sizes are simply
+    missing from sizes_in_stock; the product is still one we carry."""
     # No size filter on purpose: filtering hid products whose size was sold out,
     # and the agent then wrongly said "we don't carry that".
     return search_products(query, max_price=max_price)
 
 
 @shop_agent.tool_plain
-def check_stock(product_id: str) -> dict | str:
-    """Exact price, description, colors and quantity per size for one product_id.
-    Call this before telling the shopper a size is available."""
-    product = get_product_details(product_id)
-    if product is None:
-        return f"No product with id {product_id!r}. Use find_products to get valid ids."
-    return {k: product[k] for k in ("product_id", "name", "garment_type", "description", "colors", "price", "inventory")}
+def get_product_info(product_id: str) -> ProductInfo | str:
+    """Description, price, garment type and colors for one product (product_id from find_products).
+    Use when the shopper asks what an item looks like, what it's made of, or how much it costs."""
+    return product_info(product_id) or NOT_FOUND.format(key=product_id)
+
+
+@shop_agent.tool_plain
+def check_stock(product_id: str, size: str | None = None) -> StockReport | str:
+    """How many units are in stock for each size (XS-XXL) of one product, plus its price.
+    size: optional, e.g. "M", to also get requested_size_quantity for that one size.
+    Always call this before telling the shopper a size is available."""
+    return stock_report(product_id, size) or NOT_FOUND.format(key=product_id)
 
 
 def to_model_history(history: list[ChatTurn]) -> list[ModelMessage]:

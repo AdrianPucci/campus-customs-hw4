@@ -475,3 +475,13 @@ can you give me a short summary of how the front end talks to Fast API and how t
 **Assistant response:**
 
 Gave a short summary: the browser calls `/api/...` on the Vite dev server (port 5173), which forwards it to FastAPI on port 8000 (`vite.config.ts` proxy). The chat widget POSTs the message and history to `/api/chat`, and the session cookie identifies the shopper. `agent.py` loads `.env` (Portkey key and model), reads `prompts/prompt.md` as the system prompt, builds the `gpt-6-luna` model through Portkey, and creates the agent once at startup with its two read-only tools and `ShopReply` as structured output.
+
+## Prompt 48
+
+**User prompt:**
+
+Problem 6 Tools: Product info and Stock:  I need to give the agent tools that look up real info from the campus_customs.db: including product description, price, how many stock there are by size when the customer asks.
+
+**Assistant response:**
+
+Gave the agent three typed tools that read `campus_customs.db` live. `find_products(query, max_price)` returns `ProductSummary` list. `get_product_info(product_id)` returns `ProductInfo` with description, price, type and colors. `check_stock(product_id, size)` returns `StockReport` with units per size (XS-XXL, including 0 = sold out), total, and the requested size's count. The return types are in `backend/models.py`; lookups are in `backend/tools.py` and also accept an exact product name. Updated the Tools section of `prompts/prompt.md` (which tool to use when, quote numbers exactly). Tested the tools directly, then through the agent with tool calls printed: Yale Mom Hoodie (find, then get_product_info) gave $68; Yale Dad Hoodie in L (find, then check_stock size L) gave 20; Pierson College Crewneck per size gave XS 12, S 2, M 8, XXL 2, with L and XL sold out. All match the database. Also checked on the live site: Morse Logo T in XL showed 25 at $32.

@@ -25,6 +25,43 @@ class ProductCard(BaseModel):
     in_stock: bool
 
 
+# ---------- Agent tool results (what each tool hands back to the AI) ----------
+
+class ProductSummary(BaseModel):
+    """One search hit from find_products."""
+
+    product_id: str
+    name: str
+    garment_type: str
+    price: float
+    sizes_in_stock: list[Size]
+
+
+class ProductInfo(BaseModel):
+    """get_product_info: the catalogue facts for one product."""
+
+    product_id: str
+    name: str
+    garment_type: str
+    description: str
+    colors: list[str] = Field(description="Every color on this one item (one colorway), not color choices.")
+    price: float
+
+
+class StockReport(BaseModel):
+    """check_stock: units on hand per size, straight from the inventory table."""
+
+    product_id: str
+    name: str
+    price: float
+    sizes: list[SizeStock] = Field(description="All six sizes, XS to XXL, including sold-out ones (quantity 0).")
+    total_in_stock: int
+    requested_size: Size | None = None
+    requested_size_quantity: int | None = Field(
+        default=None, description="Units of requested_size on hand; 0 means sold out in that size."
+    )
+
+
 # ---------- Chat API (website <-> backend) ----------
 
 class ChatTurn(BaseModel):
