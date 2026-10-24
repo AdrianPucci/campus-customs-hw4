@@ -901,3 +901,23 @@ when I click on the link above it doesn't work when I turned it in
 **Assistant response:**
 
 Checked: the repo URL itself works and the repo is public. The likely cause is the bold markdown around the link in the previous reply, which can attach the stars to the URL (`...hw4**` returns 404). Gave the plain URL to copy and paste.
+
+## Prompt 90
+
+**User prompt:**
+
+we have to be done in 7 minutes with the link
+
+**Assistant response:**
+
+Gave the plain repo URL in a copy box with three steps for Canvas.
+
+## Prompt 91
+
+**User prompt:**
+
+you got it!
+
+**Assistant response:**
+
+Celebrated the submission. No changes.
