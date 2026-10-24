@@ -961,3 +961,13 @@ thanks!
 **Assistant response:**
 
 Showed the finished strip.
+
+## Prompt 96
+
+**User prompt:**
+
+Nice! can you keep the same link on git hub?
+
+**Assistant response:**
+
+Pushed the local commits (prompt log entries and the original graffiti wall) to the same repo, so the link is unchanged, and noted that GitHub shows these commits as made after the submission. Checked the live repo afterwards.
