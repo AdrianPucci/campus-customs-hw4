@@ -1001,3 +1001,13 @@ not widen, make taller
 **Assistant response:**
 
 Made the graffiti wall taller (300 px, 240 px on phones) and ran its bottom under the slanted footer: on the Home page the page has no bottom padding and the footer overlaps the wall by 70 px (`.page:has(.graffiti-strip) + .site-footer`), so the angled band cuts across the graffiti. The tag is centered in the visible part, "New Haven, CT" moved to the top corner, bottom corners squared, and the area below the footer is Yale blue so short pages have no white gap. Checked Home in the browser (overlap 70 px) and that other pages are unchanged. Committed and pushed to the same repo.
+
+## Prompt 100
+
+**User prompt:**
+
+lets change the background color of the bottom piece to black
+
+**Assistant response:**
+
+Changed the slanted footer band to black (new `--footer-bg: #000000` token in `frontend/src/index.css`), keeping the orange diagonal stripes and the graffiti tag. The area below the footer on short pages is black too, so the band continues. Checked in the browser, committed and pushed to the same repo.

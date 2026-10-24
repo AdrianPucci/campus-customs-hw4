@@ -10,6 +10,7 @@
   --danger: #b3261e;
   --accent: #c8742b; /* fall orange, used only for small seasonal touches */
   --accent-soft: rgba(200, 116, 43, 0.22);
+  --footer-bg: #000000;
   --font: 'Open Sans', system-ui, 'Segoe UI', sans-serif;
 }
 
@@ -17,9 +18,9 @@
   box-sizing: border-box;
 }
 
-/* Below the footer on short pages: Yale blue, so the footer band just continues. */
+/* Below the footer on short pages: the footer's black, so the band just continues. */
 html {
-  background: var(--yale-blue);
+  background: var(--footer-bg);
 }
 
 body {
@@ -165,7 +166,7 @@ h1 {
   font-weight: 600;
 }
 
-/* Footer: a Yale-blue band with an angled top edge and thin "street" stripes in fall orange. */
+/* Footer: a black band with an angled top edge and thin "street" stripes in fall orange. */
 .site-footer {
   position: relative;
   margin-top: 3rem;
@@ -179,7 +180,7 @@ h1 {
   color: rgba(255, 255, 255, 0.85);
   background:
     repeating-linear-gradient(-58deg, transparent 0 22px, var(--accent-soft) 22px 24px),
-    var(--yale-blue);
+    var(--footer-bg);
   clip-path: polygon(0 28px, 100% 0, 100% 100%, 0 100%);
 }
 
