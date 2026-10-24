@@ -1,0 +1,12 @@
+# Course data: never commit the database or product images
+data/
+*.db
+
+# Secrets
+.env
+
+# Dependencies and build output
+node_modules/
+frontend/dist/
+__pycache__/
+.venv/
