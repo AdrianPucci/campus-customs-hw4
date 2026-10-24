@@ -799,3 +799,23 @@ ok I have two more things. I want to do them then I need to update the harness M
 **Assistant response:**
 
 Committed the work so far and asked for the two remaining items. Reminded the user to close `harness.md` in Word before it's updated.
+
+## Prompt 80
+
+**User prompt:**
+
+can we put the code my homework 4 and push it to putblic GitHub repository.
+
+**Assistant response:**
+
+Checked the whole git history before going public: no `.env`, API keys, database, product photos, video, audit or safety logs. Found two Word lock files (`output/~$arness.md`, `notes/~$tabase_review.md`, which contain the Windows username) and removed them from all of the unpushed history (`git filter-branch`), with `~$*` now in `.gitignore`. Added a `README.md` (what the project is, layout, how to run, what's left out on purpose, highlights). Asked the user to create the empty public repo on github.com, since `gh` isn't signed in.
+
+## Prompt 81
+
+**User prompt:**
+
+I need to submit the repo url
+
+**Assistant response:**
+
+Explained the quickest route: the user creates an empty public repository on github.com (signed in there), sends the URL, then the assistant connects it and pushes with git (using the GitHub sign-in already saved in Windows), and the URL is ready to submit.
