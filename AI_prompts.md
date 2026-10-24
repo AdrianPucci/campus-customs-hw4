@@ -345,3 +345,23 @@ Hey in the harness.md file. I need you to make it more AV style so I can see som
 **Assistant response:**
 
 Restyled `output/harness.md`: moved the user's overview paragraph out of the hidden HTML comment into an "Adrian's overview" section, split into one bullet per table with the user's words unchanged, and bolded key phrases. Added a `🛑 **Adrian:**` marker to every answer slot and a key line at the top. Converted the file from Windows-1252 back to UTF-8. Saved the "AV style" rules in `CLAUDE.md`.
+
+## Prompt 35
+
+**User prompt:**
+
+fill in the fields with the answers I did
+
+**Assistant response:**
+
+Copied the user's own words from their overview into the matching field cells of `output/harness.md` (product_id, garment_type, description, size, quantity, users name/email/password_hash/created_at, chat content), with bold kept. A script checked that every cell uses only the user's exact words. Fields the overview doesn't cover are left with an empty 🛑 marker: name, colors, search_tags, image_file_path and price in catalogue; inventory id and product_id; users id, first_name and last_name; most of chat_messages.
+
+## Prompt 36
+
+**User prompt:**
+
+also did we do this? [Screenshot of instruction: build a normal create-account / login flow. Create account: first name, last name, email, password (confirm password is a nice touch). Log in: email and password]
+
+**Assistant response:**
+
+Only partly: the Log In and Create Account pages exist, but only as forms. There's no confirm-password field, and nothing is sent to the backend, saved or checked. Listed what's missing (backend sign-up and login endpoints, password hashing in the database's `pbkdf2_sha256$salt$hash` format, a logged-in state in the nav bar) and offered to build it. Reminded the user that the assignment asks for problems typed in their own words, not screenshots.

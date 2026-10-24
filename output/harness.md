@@ -19,10 +19,10 @@
 
 | Field | Why it matters (shop / chatbot) |
 |---|---|
-| `product_id` | 🛑 **Adrian:** |
+| `product_id` | 🛑 **Adrian:** gives the product id information, confirms it is a **unique item** |
 | `name` | 🛑 **Adrian:** |
-| `garment_type` | 🛑 **Adrian:** |
-| `description` | 🛑 **Adrian:** |
+| `garment_type` | 🛑 **Adrian:** what type of clothing |
+| `description` | 🛑 **Adrian:** the key descriptors |
 | `colors` | 🛑 **Adrian:** |
 | `search_tags` | 🛑 **Adrian:** |
 | `image_file_path` | 🛑 **Adrian:** |
@@ -34,18 +34,18 @@
 |---|---|
 | `id` | 🛑 **Adrian:** |
 | `product_id` | 🛑 **Adrian:** |
-| `size` | 🛑 **Adrian:** |
-| `quantity` | 🛑 **Adrian:** |
+| `size` | 🛑 **Adrian:** **how many of each item, size, quantity** ect. |
+| `quantity` | 🛑 **Adrian:** This is important to know what we have and **if there is enough** for what the shopper wants to buy. |
 
 ### `users`: shopper accounts
 
 | Field | Why it matters (shop / chatbot) |
 |---|---|
 | `id` | 🛑 **Adrian:** |
-| `name` | 🛑 **Adrian:** |
-| `email` | 🛑 **Adrian:** |
-| `password_hash` | 🛑 **Adrian:** |
-| `created_at` | 🛑 **Adrian:** |
+| `name` | 🛑 **Adrian:** a need to know list of who has shopped |
+| `email` | 🛑 **Adrian:** keeps their **login info** |
+| `password_hash` | 🛑 **Adrian:** keeps their **login info** |
+| `created_at` | 🛑 **Adrian:** when the account was created so we can **service the shoppers** |
 | `first_name` | 🛑 **Adrian:** |
 | `last_name` | 🛑 **Adrian:** |
 
@@ -56,7 +56,7 @@
 | `id` | 🛑 **Adrian:** |
 | `user_id` | 🛑 **Adrian:** |
 | `role` | 🛑 **Adrian:** |
-| `content` | 🛑 **Adrian:** |
+| `content` | 🛑 **Adrian:** **answer easy questions** and **support the shoppers** in their purchases |
 | `products_json` | 🛑 **Adrian:** |
 | `created_at` | 🛑 **Adrian:** |
 
