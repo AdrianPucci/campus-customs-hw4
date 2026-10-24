@@ -941,3 +941,23 @@ just curious, could you take my graphiti background and change it enough that yo
 **Assistant response:**
 
 Explained that the pasted image was never saved as a file, and that changing someone else's artwork does not make it free to use: it would still be a derivative of the artist's work. Offered options: get the artist's permission, use it as a class-project photo with credit, or have an original graffiti-style background made in the same palette, since a style and colors are not owned. Committed locally, not pushed.
+
+## Prompt 94
+
+**User prompt:**
+
+Yes, make an original graffiti-style background in coral, teal, olive and navy for the strip.
+
+**Assistant response:**
+
+The image-generation tool was not available (its fallback needs a separate OpenAI API key), so drew original artwork in code: `frontend/scripts/make_graffiti.py` writes `frontend/public/graffiti-wall.svg` (34 KB, fixed random seed 1701). It has a sprayed concrete-textured navy wall, angular coral and olive wildstyle shards with navy outlines and cream highlights, teal bubbles and a flowing teal line, paint drips and splatter. `GraffitiStrip.tsx` now uses it, so the strip no longer depends on the photo. Checked in the browser under the Home video. Committed locally, not pushed (the submitted repo is unchanged).
+
+## Prompt 95
+
+**User prompt:**
+
+thanks!
+
+**Assistant response:**
+
+Showed the finished strip.
