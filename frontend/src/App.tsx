@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
+import { useAuth } from './auth/AuthContext'
 import ChatWidget from './components/ChatWidget'
 import MatchingProducts from './components/MatchingProducts'
 import NavBar from './components/NavBar'
@@ -12,6 +13,7 @@ import ProductDetailPage from './pages/ProductDetailPage'
 import ProductsPage from './pages/ProductsPage'
 
 export default function App() {
+  const { user, checking } = useAuth()
   return (
     <>
       <ScrollToTop />
@@ -31,7 +33,8 @@ export default function App() {
       <footer className="site-footer">
         © 2026 Yale Bulldog Blue by Campus Customs · Class project, not the real store
       </footer>
-      <ChatWidget />
+      {/* New key on log in / log out = fresh chat panel (and the saved chat reloads) */}
+      {!checking && <ChatWidget key={user ? `user-${user.id}` : 'guest'} />}
     </>
   )
 }

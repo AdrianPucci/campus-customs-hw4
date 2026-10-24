@@ -80,6 +80,30 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     products: list[ProductCard] = Field(default_factory=list)
+    saved: bool = Field(default=False, description="True when the turn was saved to the shopper's history.")
+
+
+class HistoryMessage(BaseModel):
+    """One saved message, as reloaded into the chat panel."""
+
+    role: Literal["user", "assistant"]
+    content: str
+    products: list[ProductCard] = Field(default_factory=list)
+
+
+class ChatHistoryResponse(BaseModel):
+    messages: list[HistoryMessage]
+
+
+# ---------- Who is chatting (passed to the agent as deps) ----------
+
+class ShopperProfile(BaseModel):
+    """What get_shopper_profile returns: only the logged-in shopper's own details."""
+
+    logged_in: bool
+    first_name: str | None = None
+    last_name: str | None = None
+    email: str | None = None
 
 
 # ---------- Agent output (PydanticAI structured output) ----------

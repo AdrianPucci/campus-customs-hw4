@@ -6,6 +6,14 @@ export interface ChatMessage {
   products?: ProductCard[] // items the assistant matched, shown under its reply
 }
 
+// A logged-in shopper's saved conversation (oldest first). Guests get an empty list.
+export async function loadChatHistory(): Promise<ChatMessage[]> {
+  const res = await fetch('/api/chat/history')
+  if (!res.ok) return []
+  const data = await res.json()
+  return data.messages as ChatMessage[]
+}
+
 // Sends the message plus earlier turns to the backend's PydanticAI agent.
 // The session cookie goes along automatically, so the agent knows who is logged in.
 export async function sendChatMessage(message: string, history: ChatMessage[]): Promise<ChatMessage> {

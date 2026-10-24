@@ -11,7 +11,7 @@ from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.usage import UsageLimits
 
-from models import ChatTurn, ProductInfo, ProductSummary, ShopReply, StockReport
+from models import ChatTurn, ProductInfo, ProductSummary, ShopperProfile, ShopReply, StockReport
 from tools import product_info, search_products, stock_report
 
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -26,7 +26,17 @@ MAX_HISTORY_TURNS = 12  # older messages are dropped to keep requests small
 
 @dataclass
 class ShopperDeps:
-    first_name: str | None  # None when nobody is logged in
+    """Who is chatting. Filled by main.py from the login session (never from the chat text),
+    and handed to the agent on every run, so the model can't be talked into being someone else."""
+
+    user_id: int | None = None  # None = guest (not logged in)
+    first_name: str | None = None
+    last_name: str | None = None
+    email: str | None = None
+
+    @property
+    def logged_in(self) -> bool:
+        return self.user_id is not None
 
 
 def build_portkey_model() -> OpenAIResponsesModel:
@@ -53,10 +63,22 @@ shop_agent = Agent(
 
 
 @shop_agent.system_prompt
-def shopper_name(ctx: RunContext[ShopperDeps]) -> str:
-    if ctx.deps.first_name:
-        return f"The shopper is logged in as {ctx.deps.first_name}."
-    return "The shopper is not logged in."
+def who_is_chatting(ctx: RunContext[ShopperDeps]) -> str:
+    # Name only here; the email is available through get_shopper_profile when it's needed.
+    if ctx.deps.logged_in:
+        return (f"The shopper is logged in as {ctx.deps.first_name} {ctx.deps.last_name}. "
+                "Their earlier conversation with you is saved and included above.")
+    return "The shopper is a guest (not logged in); this chat is not saved."
+
+
+@shop_agent.tool
+def get_shopper_profile(ctx: RunContext[ShopperDeps]) -> ShopperProfile:
+    """The logged-in shopper's own name and email (from their account). Use when they ask what
+    name or email their account uses, or to personalize. Returns logged_in=false for guests."""
+    d = ctx.deps
+    if not d.logged_in:
+        return ShopperProfile(logged_in=False)
+    return ShopperProfile(logged_in=True, first_name=d.first_name, last_name=d.last_name, email=d.email)
 
 
 # ---------- Tools: every answer about products comes from campus_customs.db ----------
@@ -102,11 +124,11 @@ def to_model_history(history: list[ChatTurn]) -> list[ModelMessage]:
     return messages
 
 
-async def ask_shop_agent(message: str, history: list[ChatTurn], first_name: str | None) -> ShopReply:
+async def ask_shop_agent(message: str, history: list[ChatTurn], shopper: ShopperDeps) -> ShopReply:
     result = await shop_agent.run(
         message,
         message_history=to_model_history(history),
-        deps=ShopperDeps(first_name=first_name),
+        deps=shopper,
         usage_limits=UsageLimits(request_limit=MAX_MODEL_REQUESTS),
     )
     return result.output

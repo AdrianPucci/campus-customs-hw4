@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { sendChatMessage, type ChatMessage } from '../api/chat'
+import { loadChatHistory, sendChatMessage, type ChatMessage } from '../api/chat'
+import { useAuth } from '../auth/AuthContext'
 import { useChatResults } from '../chat/ChatResultsContext'
 
 // More matches than this are shown only on the page, not squeezed into the chat panel.
@@ -17,9 +18,19 @@ function withBold(text: string) {
   return text.split('**').map((part, i) => (i % 2 === 1 ? <strong key={i}>{part}</strong> : part))
 }
 
+// App.tsx gives this component key={user id}, so logging in or out starts a fresh panel.
 export default function ChatWidget() {
+  const { user } = useAuth()
   const [open, setOpen] = useState(false)
-  const [messages, setMessages] = useState<ChatMessage[]>([GREETING])
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [
+    user ? { role: 'assistant', content: `Welcome back, ${user.first_name}! Your chats are saved to your account.` } : GREETING,
+  ])
+
+  // Logged in: reload the saved conversation under the greeting.
+  useEffect(() => {
+    if (!user) return
+    loadChatHistory().then((saved) => setMessages((prev) => [prev[0], ...saved]))
+  }, [user])
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)

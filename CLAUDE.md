@@ -27,7 +27,9 @@ In two terminals:
 - [ ] **Expand Safety** in `backend/prompts/prompt.md` (currently "Safety basics") and write the harness Safety section.
 - [ ] **Expand Tools**: more agent tools as problems need them; document them in the harness Tools section.
 - [ ] Harness Models section (Portkey, `gpt-6-luna`, structured `ShopReply`, request cap).
-- [ ] Save chat history to `chat_messages` for logged-in shoppers (suggested).
+- [x] Save chat history to `chat_messages` for logged-in shoppers (Problem 8, done).
+- [ ] Harness: document chat history + `ShopperDeps` / `get_shopper_profile` (Models / Safety sections).
+- [ ] Optional: a "New chat" button that clears a shopper's saved history.
 - [ ] Test-question script for the chatbot (suggested).
 - [ ] Rate limit on `/api/chat` to protect the Portkey bill (suggested).
 - [ ] Ask the user for the given accounts' hash iteration count (`LEGACY_ITERATIONS` in `backend/auth.py`).
