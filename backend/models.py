@@ -107,6 +107,8 @@ class ChatResponse(BaseModel):
     reply: str
     products: list[ProductCard] = Field(default_factory=list)
     saved: bool = Field(default=False, description="True when the turn was saved to the shopper's history.")
+    notice: str | None = Field(default=None, description="Safety notice, e.g. a card number was removed.")
+    shown_message: str | None = Field(default=None, description="The shopper's message after redaction, to show instead.")
 
 
 class HistoryMessage(BaseModel):

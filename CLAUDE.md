@@ -24,7 +24,7 @@ In two terminals:
 
 ## To-do list (keep updated)
 
-- [ ] **Expand Safety** in `backend/prompts/prompt.md` (currently "Safety basics") and write the harness Safety section.
+- [x] **Expand Safety** in `backend/prompts/prompt.md` (done, Problem 9). [ ] Harness Safety section: rate limits, redaction, injection log, audit file, Portkey cache fix.
 - [ ] **Expand Tools**: more agent tools as problems need them; document them in the harness Tools section.
 - [ ] Harness Models section (Portkey, `gpt-6-luna`, structured `ShopReply`, request cap).
 - [x] Save chat history to `chat_messages` for logged-in shoppers (Problem 8, done).
@@ -32,7 +32,7 @@ In two terminals:
 - [ ] **REMIND USER (asked Prompt 57): document in the harness** the descriptor search: `find_products` filters (category, color/color_anywhere, min/max price, sort_by), `catalogue_overview()`, and page context (`viewing_product_id` → "this" = open product). The Prompt 55 harness edit failed because the file was open elsewhere.
 - [ ] Optional: a "New chat" button that clears a shopper's saved history.
 - [ ] Test-question script for the chatbot (suggested).
-- [ ] Rate limit on `/api/chat` to protect the Portkey bill (suggested).
+- [x] Rate limit on `/api/chat` (done, Problem 9: `backend/safety.py`).
 - [ ] Ask the user for the given accounts' hash iteration count (`LEGACY_ITERATIONS` in `backend/auth.py`).
 - [ ] 15 empty 🛑 Adrian cells in the harness database section (user's own words).
 - [ ] Final: public GitHub repo, push, file-tree problem.

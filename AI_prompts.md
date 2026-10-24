@@ -699,3 +699,43 @@ I think lets add some safety features and a chat limit rate. What are some indus
 **Assistant response:**
 
 Explained the common industry practice: the OWASP Top 10 for LLM Applications (prompt injection, sensitive-data leaks, excessive agency, system-prompt leakage, unbounded consumption); rate limiting per user and per IP with a sliding window, HTTP 429 + Retry-After, stricter limits for guests, one request at a time, and a global spending circuit breaker; input and output safeguards (length caps, PII redaction, moderation, validated structured output); AI disclosure; and logging. Mapped what the shop already has against these, and proposed a specific set to add with numbers. Asked for a go-ahead before building.
+
+## Prompt 70
+
+**User prompt:**
+
+Yes, build the proposed safety features and rate limits.
+
+**Assistant response:**
+
+New `backend/safety.py`. **Rate limits** (sliding windows, in memory): guests 6 per minute and 30 per hour per IP; logged-in shoppers 12 per minute and 120 per hour per account; a site-wide circuit breaker of 600 per hour; one message at a time per shopper. Over the limit returns HTTP 429 with `Retry-After` and "Whoa, Bulldog! 🐾 … try again in N seconds." **Redaction**: card numbers (13-19 digits that pass the Luhn checksum, so order and phone numbers are kept), SSNs and "password is …" are removed before the message reaches the AI or the database. The chat shows the cleaned text plus a 🔒 notice, sent as the first stream line so it's replaced even if the agent fails. **Injection detection**: common "ignore your instructions / reveal your prompt / list users" patterns are logged; the prompt and read-only tools do the blocking. **Audit log**: `data/safety_events.jsonl` (gitignored) records limit hits, redactions and injection attempts, never the message text. Wired into `/api/chat` and `/api/chat/stream` in `main.py`. **Expanded Safety section** in `prompts/prompt.md` (OWASP-based): payment details, family-friendly tone, no medical or legal advice, crisis response (911 / 988), harassment, AI honesty. **Front end**: a 🔒 notice style, rate-limit messages shown as written, and a disclosure line under the chat ("AI assistant · can make mistakes · never share payment info"). Tests: unit tests (redaction, Luhn, injection patterns, limits, one-at-a-time), endpoint tests with a stand-in agent (no AI cost; 7th guest message got 429 with Retry-After 60; audit has no message text), then live tests. **Bugs found and fixed**: (1) the card pattern swallowed the following space; (2) the card number stayed in the matching-items title, now uses the cleaned text; (3) **Portkey's response cache broke repeated questions**: a cached reply came back with a "portkey_cache_…" id that Azure rejected on the agent's next step (400), so the same question (e.g. a suggestion chip) failed every second time. Fixed with `x-portkey-cache-force-refresh` in `agent.py`; the same question 3 times in a row now works. (4) A failed agent run left the card number on screen, fixed by the early redaction line.
+
+## Prompt 71
+
+**User prompt:**
+
+Ok starting to write the next  part of the problem:
+
+**Assistant response:**
+
+Kept building the safety work while the user wrote the next part.
+
+## Prompt 72
+
+**User prompt:**
+
+I like our font and colors, I want to give the site a seasonal vibe that is a little urban. Can we add a few things  some angled lines on the bottom, maybe a little grafiti clip with fall leaves that also shows up?
+
+**Assistant response:**
+
+Queued until the safety work was tested and committed; built next (see Prompt 73).
+
+## Prompt 73
+
+**User prompt:**
+
+I don't want it too busy but just a little something to spice it up.
+
+**Assistant response:**
+
+Noted: keep the seasonal and urban touches subtle. Built after committing Prompt 70.

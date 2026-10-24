@@ -55,7 +55,13 @@ def build_portkey_model() -> OpenAIResponsesModel:
         raise RuntimeError("PORTKEY_API_KEY is missing. Add it to HMW 4/.env.")
     base_url = os.getenv("PORTKEY_BASE_URL", "https://api.portkey.ai/v1").strip()
     model_name = os.getenv("PORTKEY_MODEL", "gpt-6-luna").strip()
-    headers = {"x-portkey-api-key": api_key}
+    headers = {
+        "x-portkey-api-key": api_key,
+        # Always get a fresh answer. With Portkey's cache, a repeated question came back with a
+        # "portkey_cache_..." id that the agent then sent on its next step, and Azure rejected it
+        # (400 "Expected an ID that begins with 'fc'"). Stock changes anyway, so caching is wrong here.
+        "x-portkey-cache-force-refresh": "true",
+    }
     virtual_key = os.getenv("PORTKEY_VIRTUAL_KEY", "").strip()
     if virtual_key:
         headers["x-portkey-virtual-key"] = virtual_key

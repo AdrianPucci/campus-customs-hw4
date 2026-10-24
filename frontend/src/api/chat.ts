@@ -4,6 +4,8 @@ export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   products?: ProductCard[] // items the assistant matched, shown under its reply
+  notice?: string // safety notice, e.g. a card number was removed from the shopper's message
+  shownMessage?: string // the shopper's message after redaction, shown in place of what they typed
 }
 
 // A logged-in shopper's saved conversation (oldest first). Guests get an empty list.
@@ -23,13 +25,15 @@ export async function sendChatMessage(
   history: ChatMessage[],
   viewingProductId: string | null = null, // product page that's open, so "this" makes sense
   onStatus: (text: string) => void = () => {},
+  onRedacted: (shownMessage: string, notice: string) => void = () => {}, // sensitive data was removed
 ): Promise<ChatMessage> {
   const res = await fetch('/api/chat/stream', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       message,
-      history: history.map(({ role, content }) => ({ role, content })), // text only, no product data
+      // text only, no product data; notice-only entries (no text) aren't part of the conversation
+      history: history.filter((m) => m.content).map(({ role, content }) => ({ role, content })),
       viewing_product_id: viewingProductId,
     }),
   })
@@ -50,7 +54,15 @@ export async function sendChatMessage(
       if (!line.trim()) continue
       const event = JSON.parse(line)
       if (event.type === 'status') onStatus(event.text)
-      else if (event.type === 'done') return { role: 'assistant', content: event.reply, products: event.products }
+      else if (event.type === 'redacted') onRedacted(event.shown_message, event.notice)
+      else if (event.type === 'done')
+        return {
+          role: 'assistant',
+          content: event.reply,
+          products: event.products,
+          notice: event.notice ?? undefined,
+          shownMessage: event.shown_message ?? undefined,
+        }
       else if (event.type === 'error') throw new Error(event.detail)
     }
     if (done) break
