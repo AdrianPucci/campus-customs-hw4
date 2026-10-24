@@ -99,6 +99,44 @@ h1 {
   border-bottom-color: var(--yale-blue);
 }
 
+.nav-greeting {
+  color: var(--yale-blue);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.nav-button:hover {
+  color: var(--yale-blue);
+}
+
+.hint {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.form .error {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 /* ---------- Page layout ---------- */
 .page {
   max-width: 1200px;

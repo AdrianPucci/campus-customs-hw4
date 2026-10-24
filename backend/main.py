@@ -5,14 +5,12 @@ Run from the HMW 4 folder:
 """
 import json
 import sqlite3
-from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = PROJECT_ROOT / "data"
-DB_PATH = DATA_DIR / "campus_customs.db"
+from .auth import router as auth_router
+from .db import DATA_DIR, get_db
 
 # Sizes sort in this order, not alphabetically (alphabetical would put L before S).
 SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL"]
@@ -23,13 +21,7 @@ app = FastAPI(title="Campus Customs API")
 # so the image URL is "/media/" + that path. Only the products folder is served,
 # never data/ itself, or the database file would be downloadable.
 app.mount("/media/products", StaticFiles(directory=DATA_DIR / "products"), name="media")
-
-
-def get_db() -> sqlite3.Connection:
-    """Open the database read-only; rows behave like dicts."""
-    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
-    conn.row_factory = sqlite3.Row
-    return conn
+app.include_router(auth_router)
 
 
 def product_to_dict(row: sqlite3.Row, inventory: list[sqlite3.Row]) -> dict:

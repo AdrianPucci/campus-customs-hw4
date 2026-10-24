@@ -365,3 +365,23 @@ also did we do this? [Screenshot of instruction: build a normal create-account /
 **Assistant response:**
 
 Only partly: the Log In and Create Account pages exist, but only as forms. There's no confirm-password field, and nothing is sent to the backend, saved or checked. Listed what's missing (backend sign-up and login endpoints, password hashing in the database's `pbkdf2_sha256$salt$hash` format, a logged-in state in the nav bar) and offered to build it. Reminded the user that the assignment asks for problems typed in their own words, not screenshots.
+
+## Prompt 37
+
+**User prompt:**
+
+Yes, build the create-account / login flow: first name, last name, email, password and confirm password; log in with email and password.
+
+**Assistant response:**
+
+Built the flow (details under Prompt 38, which asked for the same thing in the user's own words). Note: an attempt to work out the existing hash's iteration count by guessing the test account's password was blocked as credential cracking and dropped. New accounts use a fixed count (`PBKDF2_ITERATIONS = 100_000` in `backend/auth.py`), so the three existing accounts can log in only if that matches the course's recipe.
+
+## Prompt 38
+
+**User prompt:**
+
+yea can you build a normal create-account/ login flow for me? I want the following: Create account: first name, last name, email,  password, confirm password field for me, then add the login field with email and password entry fields
+
+**Assistant response:**
+
+Backend: new `backend/auth.py` with `POST /api/auth/register`, `/login`, `/logout` and `GET /api/auth/me`. Passwords are saved as `pbkdf2_sha256$salt$hash` with a random salt per user, emails are lowercased, a duplicate email returns "already exists", and a wrong email or password both return the same message. Login uses an httponly session cookie. Shared database helpers moved to `backend/db.py`. Front end: `auth/AuthContext.tsx` keeps who's logged in. Create Account now has a confirm-password field with a live "Passwords do not match" warning, and both forms show backend errors. After logging in, the nav bar shows "Hi, <first name>" and Log Out. Tested in the browser with a throwaway account (mismatch warning, sign-up, staying logged in after reload, duplicate email, log out, wrong password, correct login), then deleted it from the database.
