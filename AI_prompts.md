@@ -679,3 +679,13 @@ man, I can't get it to work on my phone.
 **Assistant response:**
 
 Explained that `localhost` on a phone means the phone itself. Added a `dev:phone` script (`vite --host`, in `frontend/package.json`) and a launch config, and restarted the front end that way, so it also listens at http://10.66.128.177:5173 (checked: page and API respond). Found the computer is on YaleSecure, which Windows treats as a Public network: campus Wi-Fi usually blocks device-to-device traffic and Windows Firewall blocks incoming connections on Public networks, so the phone likely still can't connect there. Did not change firewall or network settings, which are the user's own security settings. Gave options: try on home Wi-Fi or a phone hotspot (allowing Node.js when Windows asks), or preview phone size in the Browser pane or Chrome's device mode.
+
+## Prompt 68
+
+**User prompt:**
+
+oooh... like it... beleza!
+
+**Assistant response:**
+
+Acknowledged that the user likes the new video hero. Offered the backend list (chat rate limit, test-question script, smarter model for hard questions, expanded Safety) as the next step. No changes.
