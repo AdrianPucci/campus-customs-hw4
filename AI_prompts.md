@@ -253,3 +253,13 @@ Actually can you change my name to Adrian V only
 **Assistant response:**
 
 Changed this project's git name to "Adrian V" and rewrote the first commit's author to match. That was safe because it hadn't been pushed yet. Email unchanged.
+
+## Prompt 26
+
+**User prompt:**
+
+or too late?
+
+**Assistant response:**
+
+Not too late: the name change already went through. The commit hadn't been pushed, so its author could be rewritten. Only commits already on GitHub are effectively too late to change.
