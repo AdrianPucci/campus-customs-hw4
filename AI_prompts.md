@@ -689,3 +689,13 @@ oooh... like it... beleza!
 **Assistant response:**
 
 Acknowledged that the user likes the new video hero. Offered the backend list (chat rate limit, test-question script, smarter model for hard questions, expanded Safety) as the next step. No changes.
+
+## Prompt 69
+
+**User prompt:**
+
+I think lets add some safety features and a chat limit rate. What are some industry standards for this type of chat use?
+
+**Assistant response:**
+
+Explained the common industry practice: the OWASP Top 10 for LLM Applications (prompt injection, sensitive-data leaks, excessive agency, system-prompt leakage, unbounded consumption); rate limiting per user and per IP with a sliding window, HTTP 429 + Retry-After, stricter limits for guests, one request at a time, and a global spending circuit breaker; input and output safeguards (length caps, PII redaction, moderation, validated structured output); AI disclosure; and logging. Mapped what the shop already has against these, and proposed a specific set to add with numbers. Asked for a go-ahead before building.
