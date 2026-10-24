@@ -68,7 +68,35 @@ _To be added in a later problem._
 
 ## 3. Tools
 
-_To be added in a later problem._
+> Agent tools live in `backend/agent.py`; the lookups they call are in `backend/tools.py`.
+> **All tools are read-only** and touch only `catalogue` and `inventory`, never `users`.
+
+### The agent's tools
+
+| Tool | Reads | Returns | Used when the shopper asks… |
+|---|---|---|---|
+| `find_products(query, max_price, browse)` | `catalogue` + `inventory` | list of `ProductSummary` (id, name, type, **price**, sizes in stock); up to 8, or **up to 30 with `browse=true`** | "what hoodies do you have?", "gift for my dad" |
+| `get_product_info(product_id)` | `catalogue` | `ProductInfo` (**description**, **price**, type, colors) | "what does it look like?", "how much is…?" |
+| `check_stock(product_id, size)` | `catalogue` + `inventory` | `StockReport` (**quantity per size** XS–XXL, total, the asked size's count) | "do you have it in M?", "how many left?" |
+
+🛑 **Adrian:**
+
+### How search results reach the page
+
+1. **Shopper asks** in the chat panel → the website sends `POST /api/chat` with the message and recent history.
+2. **Agent searches** with its tools and returns a structured `ShopReply`: a short `message` + the matching **`product_ids`**.
+3. **Backend builds the cards** (`main.py`): looks each id up in the database and returns a `ProductCard` per product (image, name, **price**, short info, sizes in stock). **Ids that don't exist are dropped**, so the AI can't put a fake product on the page.
+4. **Website shows them**: `ChatWidget` hands the cards to a shared `ChatResultsContext`; the **Matching items** section (`MatchingProducts.tsx`) shows them at the **top of whatever page is open** (up to 4 also appear inside the chat panel).
+5. **Click a card → detail page** at `/products/<product_id>` (the Problem 3 single-item page): **large image + full description, price, colors and stock per size**. The page opens scrolled to the top; the matches shrink to a **"← Back to your N matching items"** bar so the detail view stays in sight.
+
+```
+Chat panel ─POST /api/chat─► FastAPI ─► Agent + tools ─► campus_customs.db
+     ▲                          │ product_ids → ProductCards (from the DB)
+     └──── reply + cards ◄──────┘
+Cards on page ─click─► /products/<id> ─GET /api/products/<id>─► detail view
+```
+
+🛑 **Adrian:**
 
 ## 4. Safety
 

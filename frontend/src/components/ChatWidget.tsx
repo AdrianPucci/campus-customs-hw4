@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { sendChatMessage, type ChatMessage } from '../api/chat'
 import { useChatResults } from '../chat/ChatResultsContext'
 
@@ -24,6 +24,7 @@ export default function ChatWidget() {
   const [sending, setSending] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
   const { showResults } = useChatResults()
+  const { pathname } = useLocation()
 
   // Keep the newest message in view.
   useEffect(() => {
@@ -44,7 +45,7 @@ export default function ChatWidget() {
       const reply = await sendChatMessage(text, messages.slice(1))
       setMessages((prev) => [...prev, reply])
       // Matching items also appear as full cards on the page itself.
-      if (reply.products?.length) showResults({ question: text, products: reply.products })
+      if (reply.products?.length) showResults({ question: text, products: reply.products, askedOn: pathname })
     } catch (err) {
       setMessages((prev) => [...prev, { role: 'assistant', content: `Sorry, ${(err as Error).message}` }])
     } finally {

@@ -505,3 +505,33 @@ can you show me how this looks?
 **Assistant response:**
 
 Took a screenshot of the browser after asking "what hoodies do you have?" and opened the Browser pane so the user can see the matching-items section and chat panel live.
+
+## Prompt 51
+
+**User prompt:**
+
+Next step once we've take a look: make sure that the single-item page behavior we did in problme 3 still works. that each product card including the ones an active customer chat should open that detail view (large image + full info) when clicked. UPdate prompts/promt.md and the harness.md so it is clear how the search results reach the page.
+
+**Assistant response:**
+
+Tested every way into the detail page and found two bugs. (1) Clicking a chat card opened the right page, but the detail view was about 12,400 px down, below the 27 cards. Fixed: on a detail page the matches collapse to a "← Back to your N matching items" bar (expandable), and the new `components/ScrollToTop.tsx` starts every page at the top. (2) That scroll fix first crashed the app because newer Chrome returns a Promise from `window.scrollTo`, which a one-line React effect handed back to React. Fixed with braces. Also made fresh results always show in full where they were asked (`askedOn` in `ChatResultsContext`). Retested all three paths: a Products page card (from 3000 px down), an on-page chat card and a chat-panel mini card each open the detail view at the top with the large image, full info and 6 sizes, and the chat stays open. Added "How your search results reach the page" to `backend/prompts/prompt.md` and filled the harness **Tools** section (`output/harness.md`): a tools table, the 5-step results-to-page flow and a diagram, with empty 🛑 Adrian slots for the user's notes.
+
+## Prompt 52
+
+**User prompt:**
+
+Problem 8: When a shopper is logged in, save their chat history in the database in an appropriate table and reload it when they return. The agent should know who is chatting (name and emailO - put that in agent deps or an equivalent clear pattern and or tools the agent can call.
+
+**Assistant response:**
+
+Queued until Prompt 51's fix was tested and committed (see the next entries for the build).
+
+## Prompt 53
+
+**User prompt:**
+
+got it. grabbing some coffee i'll be back.. get yours too if you need it.. speedster!
+
+**Assistant response:**
+
+Kept working on Prompt 51's docs and commit, then Problem 8, while the user was away.

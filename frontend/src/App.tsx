@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import ChatWidget from './components/ChatWidget'
 import MatchingProducts from './components/MatchingProducts'
 import NavBar from './components/NavBar'
+import ScrollToTop from './components/ScrollToTop'
 import AboutPage from './pages/AboutPage'
 import CreateAccountPage from './pages/CreateAccountPage'
 import HomePage from './pages/HomePage'
@@ -13,6 +14,7 @@ import ProductsPage from './pages/ProductsPage'
 export default function App() {
   return (
     <>
+      <ScrollToTop />
       <NavBar />
       <main className="page">
         <MatchingProducts />

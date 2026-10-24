@@ -1,18 +1,41 @@
-import { useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useChatResults } from '../chat/ChatResultsContext'
 
 // The products the chat agent found, shown as cards at the top of whatever page is open.
+// On a single-product page it shrinks to one line, so the detail view stays in sight.
 export default function MatchingProducts() {
   const { results, clearResults } = useChatResults()
+  const { pathname } = useLocation()
   const sectionRef = useRef<HTMLElement>(null)
+  const onDetailPage = pathname.startsWith('/products/')
+  // Remembers which page + results the shopper expanded; any new page or new results collapse it again.
+  const [expandedAt, setExpandedAt] = useState<{ pathname: string; results: unknown } | null>(null)
+  const expanded = expandedAt?.pathname === pathname && expandedAt.results === results
+  const setExpanded = () => setExpandedAt({ pathname, results })
 
-  // Bring the new cards into view each time the agent finds something.
+  // New results: bring them into view.
   useEffect(() => {
     if (results) sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [results])
 
   if (!results) return null
+  const count = results.products.length
+  const label = `${count} matching item${count === 1 ? '' : 's'}`
+
+  // Collapse only after the shopper has clicked through to a product, not where they asked.
+  if (onDetailPage && pathname !== results.askedOn && !expanded) {
+    return (
+      <section ref={sectionRef} className="matching-bar" aria-label="Matching items from chat">
+        <button type="button" className="link-button" onClick={setExpanded}>
+          ← Back to your {label} from chat
+        </button>
+        <button type="button" className="matching-close" onClick={clearResults} aria-label="Hide matching items">
+          ×
+        </button>
+      </section>
+    )
+  }
 
   return (
     <section ref={sectionRef} className="matching" aria-label="Matching items from chat">
@@ -20,7 +43,7 @@ export default function MatchingProducts() {
         <div>
           <p className="eyebrow">From your chat</p>
           <h2>
-            {results.products.length} matching item{results.products.length === 1 ? '' : 's'}
+            {label}
             <span className="matching-question"> for “{results.question}”</span>
           </h2>
         </div>
@@ -31,6 +54,7 @@ export default function MatchingProducts() {
 
       <div className="product-grid">
         {results.products.map((p) => (
+          // Same detail route as the Products page cards: /products/<product_id>
           <Link key={p.product_id} to={`/products/${p.product_id}`} className="product-card match-card">
             <img src={p.image_url} alt={p.name} loading="lazy" />
             <h3>{p.name}</h3>

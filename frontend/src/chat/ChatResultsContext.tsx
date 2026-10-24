@@ -4,6 +4,7 @@ import type { ProductCard } from '../types'
 export interface ChatResults {
   question: string // what the shopper asked, shown as the section title
   products: ProductCard[]
+  askedOn: string // page path where the question was asked
 }
 
 interface ChatResultsState {
