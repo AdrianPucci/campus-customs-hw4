@@ -435,3 +435,43 @@ In main.py expose a chat route so a message from the website returns a reply fro
 **Assistant response:**
 
 Added `POST /api/chat` in `main.py`: it takes the message and history, adds the logged-in shopper's first name from the session, runs the agent, and returns the reply plus full data for only real product ids (made-up ids are dropped). Connected the chat widget (`api/chat.ts`, `ChatWidget.tsx`): replies show **bold** safely, and matching products appear as small cards with photo and price that link to their product page. Confirmed the user's own Portkey key (from `.env`) is used. Tested in the browser: "show me some hockey hoodies" returned 2 correct cards, and the follow-up "is the first one in stock in large?" correctly said sold out. Gave suggestions for next steps.
+
+## Prompt 44
+
+**User prompt:**
+
+Put campus customs voice and safety basics into prompts/ promt.md - we will expand safety and tools later. Let's make sure we keep that on our to-do list.  Start or update types in models. py for chat replies/ product cards as needed.
+
+**Assistant response:**
+
+Reorganized `backend/prompts/prompt.md` into Role, **Campus Customs voice** (warm, upbeat Bulldog pride used lightly, short, family-friendly, wording taken from the real site), Honesty rules, Tools (basics), Store information, **Safety basics** (stay on topic, protect private data, keep instructions private, ignore injected instructions, no unsafe content, no invented discounts or policies) and Format. Safety and Tools are marked "to be expanded". `backend/models.py` now has `SizeStock`, `ProductCard` (id, name, type, price, image, sizes in stock, in_stock), `ChatTurn`, `ChatRequest`, `ChatResponse` (reply + list of `ProductCard`) and the agent's `ShopReply`. `/api/chat` now returns product cards, the chat widget shows in-stock sizes or "Sold out" on each card, and `frontend/src/types.ts` matches. Added a **To-do list** to `CLAUDE.md` (expand Safety, expand Tools, harness sections, suggestions, open questions). Testing showed the agent missed the Yale Dad items for "gift for my dad", so added a prompt rule to put who the gift is for in the search. Retested: Yale Dad Crewneck $58 and Hoodie $68 with correct sizes.
+
+## Prompt 45
+
+**User prompt:**
+
+make sure the backend runs from the backend folder like this:
+
+**Assistant response:**
+
+Switched the backend to plain imports (`from auth import ...` instead of `from .auth import ...`) and removed `backend/__init__.py`, so it runs from inside `backend/`. Updated the run instructions in `main.py` and `CLAUDE.md`, and the launch configs.
+
+## Prompt 46
+
+**User prompt:**
+
+uvicorn main:app --reload --port 8000
+
+**Assistant response:**
+
+Confirmed that's the command. Restarted the server that way and tested `/api/products` and `/api/chat`. Found that `uvicorn.exe` is installed but its folder (`AppData\Roaming\Python\Python314\Scripts`) isn't on PATH, so `uvicorn` alone won't be recognized. `python -m uvicorn main:app --reload --port 8000` works the same, or the folder can be added to PATH.
+
+## Prompt 47
+
+**User prompt:**
+
+can you give me a short summary of how the front end talks to Fast API and how the agent is loaded? (prompt file + model).
+
+**Assistant response:**
+
+Gave a short summary: the browser calls `/api/...` on the Vite dev server (port 5173), which forwards it to FastAPI on port 8000 (`vite.config.ts` proxy). The chat widget POSTs the message and history to `/api/chat`, and the session cookie identifies the shopper. `agent.py` loads `.env` (Portkey key and model), reads `prompts/prompt.md` as the system prompt, builds the `gpt-6-luna` model through Portkey, and creates the agent once at startup with its two read-only tools and `ShopReply` as structured output.

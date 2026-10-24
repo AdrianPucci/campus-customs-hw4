@@ -1,7 +1,8 @@
 """FastAPI backend for Campus Customs.
 
-Run from the HMW 4 folder:
-    uvicorn backend.main:app --reload --port 8000
+Run from the backend folder:
+    cd backend
+    uvicorn main:app --reload --port 8000
 """
 import logging
 
@@ -9,12 +10,12 @@ from fastapi import Cookie, FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic_ai.exceptions import UsageLimitExceeded
 
-from .agent import ask_shop_agent
-from .auth import SESSIONS
-from .auth import router as auth_router
-from .db import DATA_DIR, get_db
-from .models import ChatRequest, ChatResponse
-from .tools import get_product_details, load_products
+from agent import ask_shop_agent
+from auth import SESSIONS
+from auth import router as auth_router
+from db import DATA_DIR, get_db
+from models import ChatRequest, ChatResponse
+from tools import get_product_details, load_products, to_card
 
 log = logging.getLogger("campus_customs")
 
@@ -59,4 +60,5 @@ async def chat(body: ChatRequest, cc_session: str | None = Cookie(default=None))
 
     # Show only real products: drop any id the model made up, keep its order, no repeats.
     ids = list(dict.fromkeys(answer.product_ids))
-    return ChatResponse(reply=answer.message, products=load_products(ids) if ids else [])
+    cards = [to_card(p) for p in load_products(ids)] if ids else []
+    return ChatResponse(reply=answer.message, products=cards)

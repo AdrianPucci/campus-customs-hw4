@@ -18,9 +18,21 @@ The user is learning. Explain the reasoning behind a change, not just the change
 
 ## Running the app
 
-From the `HMW 4` folder, in two terminals:
-- Backend: `python -m uvicorn backend.main:app --reload --port 8000`
-- Frontend: `npm run dev --prefix frontend` → http://localhost:5173
+In two terminals:
+- Backend, from the `backend` folder: `cd backend` then `uvicorn main:app --reload --port 8000` (plain imports like `from auth import ...`; there's no package, so don't run it as `backend.main`)
+- Frontend, from `HMW 4`: `npm run dev --prefix frontend` → http://localhost:5173
+
+## To-do list (keep updated)
+
+- [ ] **Expand Safety** in `backend/prompts/prompt.md` (currently "Safety basics") and write the harness Safety section.
+- [ ] **Expand Tools**: more agent tools as problems need them; document them in the harness Tools section.
+- [ ] Harness Models section (Portkey, `gpt-6-luna`, structured `ShopReply`, request cap).
+- [ ] Save chat history to `chat_messages` for logged-in shoppers (suggested).
+- [ ] Test-question script for the chatbot (suggested).
+- [ ] Rate limit on `/api/chat` to protect the Portkey bill (suggested).
+- [ ] Ask the user for the given accounts' hash iteration count (`LEGACY_ITERATIONS` in `backend/auth.py`).
+- [ ] 15 empty 🛑 Adrian cells in the harness database section (user's own words).
+- [ ] Final: public GitHub repo, push, file-tree problem.
 
 ## AV style for answer files (`output/harness.md`)
 

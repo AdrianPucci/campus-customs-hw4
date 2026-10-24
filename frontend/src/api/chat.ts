@@ -1,9 +1,9 @@
-import type { Product } from '../types'
+import type { ProductCard } from '../types'
 
 export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
-  products?: Product[] // items the assistant matched, shown under its reply
+  products?: ProductCard[] // items the assistant matched, shown under its reply
 }
 
 // Sends the message plus earlier turns to the backend's PydanticAI agent.

@@ -11,8 +11,8 @@ from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.usage import UsageLimits
 
-from .models import ChatTurn, ShopReply
-from .tools import get_product_details, search_products
+from models import ChatTurn, ShopReply
+from tools import get_product_details, search_products
 
 BACKEND_DIR = Path(__file__).resolve().parent
 load_dotenv(BACKEND_DIR.parent / ".env")

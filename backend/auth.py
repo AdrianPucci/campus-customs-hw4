@@ -15,7 +15,7 @@ import time
 from fastapi import APIRouter, Cookie, HTTPException, Request, Response
 from pydantic import BaseModel
 
-from .db import get_db, get_db_writable
+from db import get_db, get_db_writable
 
 # Work factor for new hashes (OWASP's current recommendation for PBKDF2-SHA256).
 # Each guess costs an attacker this many rounds, so stolen hashes are slow to crack.

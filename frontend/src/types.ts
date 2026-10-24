@@ -4,6 +4,17 @@ export interface SizeStock {
   quantity: number
 }
 
+// Matches ProductCard in backend/models.py: the small card shown under a chat reply.
+export interface ProductCard {
+  product_id: string
+  name: string
+  garment_type: string
+  price: number
+  image_url: string
+  sizes_in_stock: string[]
+  in_stock: boolean
+}
+
 export interface Product {
   product_id: string
   name: string

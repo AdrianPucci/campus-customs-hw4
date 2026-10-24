@@ -68,6 +68,9 @@ export default function ChatWidget() {
                         <img src={p.image_url} alt="" />
                         <span className="chat-product-name">{p.name}</span>
                         <span className="price">${p.price.toFixed(2)}</span>
+                        <span className="chat-product-sizes">
+                          {p.in_stock ? p.sizes_in_stock.join(' · ') : 'Sold out'}
+                        </span>
                       </Link>
                     ))}
                   </div>

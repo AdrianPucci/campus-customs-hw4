@@ -7,7 +7,8 @@ import json
 import re
 import sqlite3
 
-from .db import get_db
+from db import get_db
+from models import ProductCard
 
 # Sizes sort in this order, not alphabetically (alphabetical would put L before S).
 SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL"]
@@ -90,6 +91,19 @@ def search_products(query: str, max_price: float | None = None, size: str | None
             scored.append((score, p))
     scored.sort(key=lambda sp: (-sp[0], sp[1]["name"]))
     return [_summary(p) for _, p in scored[:limit]]
+
+
+def to_card(p: dict) -> ProductCard:
+    in_stock = [s["size"] for s in p["inventory"] if s["quantity"] > 0]
+    return ProductCard(
+        product_id=p["product_id"],
+        name=p["name"],
+        garment_type=p["garment_type"],
+        price=p["price"],
+        image_url=p["image_url"],
+        sizes_in_stock=in_stock,
+        in_stock=bool(in_stock),
+    )
 
 
 def get_product_details(product_id: str) -> dict | None:

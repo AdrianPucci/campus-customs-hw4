@@ -455,6 +455,11 @@ h1 {
   line-height: 1.25;
 }
 
+.chat-product-sizes {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
 .chat-bubble.assistant {
   align-self: flex-start;
   background: #fff;
