@@ -53,7 +53,8 @@ export default function ChatWidget() {
     setSending(true)
     try {
       // The greeting is just for the screen; the agent only needs the real conversation.
-      const reply = await sendChatMessage(text, messages.slice(1))
+      const viewing = pathname.startsWith('/products/') ? decodeURIComponent(pathname.slice('/products/'.length)) : null
+      const reply = await sendChatMessage(text, messages.slice(1), viewing)
       setMessages((prev) => [...prev, reply])
       // Matching items also appear as full cards on the page itself.
       if (reply.products?.length) showResults({ question: text, products: reply.products, askedOn: pathname })

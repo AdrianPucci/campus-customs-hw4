@@ -16,13 +16,18 @@ export async function loadChatHistory(): Promise<ChatMessage[]> {
 
 // Sends the message plus earlier turns to the backend's PydanticAI agent.
 // The session cookie goes along automatically, so the agent knows who is logged in.
-export async function sendChatMessage(message: string, history: ChatMessage[]): Promise<ChatMessage> {
+export async function sendChatMessage(
+  message: string,
+  history: ChatMessage[],
+  viewingProductId: string | null = null, // product page that's open, so "this" makes sense
+): Promise<ChatMessage> {
   const res = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       message,
       history: history.map(({ role, content }) => ({ role, content })), // text only, no product data
+      viewing_product_id: viewingProductId,
     }),
   })
   const data = await res.json().catch(() => ({}))

@@ -28,14 +28,37 @@ class ProductCard(BaseModel):
 
 # ---------- Agent tool results (what each tool hands back to the AI) ----------
 
+Category = Literal["hoodie", "crewneck", "t-shirt", "long-sleeve", "quarter-zip", "jacket", "other"]
+SortBy = Literal["relevance", "price_low", "price_high", "most_in_stock", "name"]
+
+
 class ProductSummary(BaseModel):
     """One search hit from find_products."""
 
     product_id: str
     name: str
+    category: Category
     garment_type: str
     price: float
+    main_color: str = Field(description="The garment's own color.")
+    accent_colors: list[str] = Field(description="Colors of the print or trim, not other versions of the item.")
     sizes_in_stock: list[Size]
+    total_in_stock: int
+
+
+class CountAndPrices(BaseModel):
+    count: int
+    min_price: float
+    max_price: float
+
+
+class CatalogueOverview(BaseModel):
+    """catalogue_overview: what the store carries, for "what colors / what kinds / cheapest" questions."""
+
+    total_products: int
+    categories: dict[str, CountAndPrices]
+    main_colors: dict[str, int] = Field(description="Garment color -> number of products in that color.")
+    accent_colors: dict[str, int] = Field(description="Print/trim color -> number of products using it.")
 
 
 class ProductInfo(BaseModel):
@@ -75,6 +98,9 @@ class ChatTurn(BaseModel):
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
     history: list[ChatTurn] = Field(default_factory=list, max_length=40)
+    viewing_product_id: str | None = Field(
+        default=None, max_length=200, description="Product page the shopper has open, so 'this' / 'it' make sense."
+    )
 
 
 class ChatResponse(BaseModel):

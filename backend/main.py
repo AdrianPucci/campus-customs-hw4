@@ -57,6 +57,7 @@ def current_shopper(cc_session: str | None) -> ShopperDeps:
 @app.post("/api/chat")
 async def chat(body: ChatRequest, cc_session: str | None = Cookie(default=None)) -> ChatResponse:
     shopper = current_shopper(cc_session)
+    shopper.viewing_product_id = body.viewing_product_id
     # Logged in: the saved history in the database is the context (it survives reloads and
     # can't be edited by the browser). Guests: whatever the chat panel sent.
     history = history_as_turns(shopper.user_id, MAX_HISTORY_TURNS) if shopper.logged_in else body.history

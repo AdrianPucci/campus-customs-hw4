@@ -8,7 +8,9 @@ import re
 import sqlite3
 
 from db import get_db
-from models import ProductCard, ProductInfo, ProductSummary, SizeStock, StockReport
+from models import (
+    CatalogueOverview, CountAndPrices, ProductCard, ProductInfo, ProductSummary, SizeStock, StockReport,
+)
 
 # Sizes sort in this order, not alphabetically (alphabetical would put L before S).
 SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL"]
@@ -61,23 +63,68 @@ def _words(text: str) -> set[str]:
     return words | {w[:-1] for w in words if w.endswith("s") and len(w) > 3}
 
 
+def category(p: dict) -> str:
+    """One simple category per product; the database's garment_type has 22 different spellings."""
+    text = (p["garment_type"] + " " + p["name"]).lower()
+    for cat, words in [
+        ("quarter-zip", ["quarter-zip", "1 4 zip", "1/4 zip"]),
+        ("jacket", ["jacket"]),
+        ("hoodie", ["hood"]),
+        ("long-sleeve", ["long-sleeve", "long sleeve"]),
+        ("t-shirt", ["t-shirt", "t shirt"]),
+        ("crewneck", ["crewneck", "crew", "sweatshirt", "mockneck"]),
+    ]:
+        if any(w in text for w in words):
+            return cat
+    return "other"
+
+
+def _matches_color(color: str, colors: list[str]) -> bool:
+    """'gray' or 'grey' matches 'heather gray'; 'blue' matches 'navy blue'; 'navy' matches 'navy'."""
+    wanted = color.lower().replace("grey", "gray").strip()
+    return any(wanted in c.lower() for c in colors)
+
+
 def _summary(p: dict) -> ProductSummary:
     """The compact view the agent needs to pick products; keeps tool output small."""
     return ProductSummary(
         product_id=p["product_id"],
         name=p["name"],
+        category=category(p),
         garment_type=p["garment_type"],
         price=p["price"],
+        main_color=p["colors"][0] if p["colors"] else "",
+        accent_colors=p["colors"][1:],
         sizes_in_stock=[s["size"] for s in p["inventory"] if s["quantity"] > 0],
+        total_in_stock=p["total_stock"],
     )
 
 
-def search_products(query: str, max_price: float | None = None, limit: int = 8) -> list[ProductSummary]:
-    """Keyword search over name, type, description, colors and tags, best match first."""
+def search_products(
+    query: str = "",
+    max_price: float | None = None,
+    min_price: float | None = None,
+    color: str | None = None,
+    color_anywhere: bool = False,
+    category_filter: str | None = None,
+    sort_by: str = "relevance",
+    limit: int = 8,
+) -> list[ProductSummary]:
+    """Keyword search over name, type, description, colors and tags, with optional filters.
+
+    color: the garment's own (main) color, unless color_anywhere also allows print/trim colors.
+    sort_by: relevance (best match first), price_low, price_high, most_in_stock or name.
+    """
     terms = _words(query) - STOP_WORDS
     scored = []
     for p in load_products():
         if max_price is not None and p["price"] > max_price:
+            continue
+        if min_price is not None and p["price"] < min_price:
+            continue
+        if category_filter and category(p) != category_filter:
+            continue
+        if color and not _matches_color(color, p["colors"] if color_anywhere else p["colors"][:1]):
             continue
         # Name and type matches count more than words buried in the description.
         strong = _words(p["name"] + " " + p["garment_type"] + " " + " ".join(p["search_tags"]))
@@ -85,8 +132,33 @@ def search_products(query: str, max_price: float | None = None, limit: int = 8) 
         score = sum(3 if t in strong else 1 if t in weak else 0 for t in terms)
         if score or not terms:
             scored.append((score, p))
-    scored.sort(key=lambda sp: (-sp[0], sp[1]["name"]))
+    sort_keys = {
+        "price_low": lambda sp: (sp[1]["price"], -sp[0], sp[1]["name"]),
+        "price_high": lambda sp: (-sp[1]["price"], -sp[0], sp[1]["name"]),
+        "most_in_stock": lambda sp: (-sp[1]["total_stock"], sp[1]["name"]),
+        "name": lambda sp: sp[1]["name"],
+    }
+    scored.sort(key=sort_keys.get(sort_by, lambda sp: (-sp[0], sp[1]["name"])))
     return [_summary(p) for _, p in scored[:limit]]
+
+
+def catalogue_overview() -> CatalogueOverview:
+    products = load_products()
+    cats: dict[str, list[float]] = {}
+    main: dict[str, int] = {}
+    accent: dict[str, int] = {}
+    for p in products:
+        cats.setdefault(category(p), []).append(p["price"])
+        if p["colors"]:
+            main[p["colors"][0]] = main.get(p["colors"][0], 0) + 1
+        for c in p["colors"][1:]:
+            accent[c] = accent.get(c, 0) + 1
+    return CatalogueOverview(
+        total_products=len(products),
+        categories={c: CountAndPrices(count=len(v), min_price=min(v), max_price=max(v)) for c, v in sorted(cats.items())},
+        main_colors=dict(sorted(main.items(), key=lambda kv: -kv[1])),
+        accent_colors=dict(sorted(accent.items(), key=lambda kv: -kv[1])),
+    )
 
 
 def short_info(description: str, max_chars: int = 110) -> str:

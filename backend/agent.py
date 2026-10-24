@@ -11,7 +11,11 @@ from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from pydantic_ai.usage import UsageLimits
 
-from models import ChatTurn, ProductInfo, ProductSummary, ShopperProfile, ShopReply, StockReport
+from models import (
+    CatalogueOverview, Category, ChatTurn, ProductInfo, ProductSummary, ShopperProfile, ShopReply, SortBy,
+    StockReport,
+)
+from tools import catalogue_overview as get_catalogue_overview
 from tools import product_info, search_products, stock_report
 
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -33,6 +37,7 @@ class ShopperDeps:
     first_name: str | None = None
     last_name: str | None = None
     email: str | None = None
+    viewing_product_id: str | None = None  # product page open in the browser, if any
 
     @property
     def logged_in(self) -> bool:
@@ -66,9 +71,21 @@ shop_agent = Agent(
 def who_is_chatting(ctx: RunContext[ShopperDeps]) -> str:
     # Name only here; the email is available through get_shopper_profile when it's needed.
     if ctx.deps.logged_in:
-        return (f"The shopper is logged in as {ctx.deps.first_name} {ctx.deps.last_name}. "
-                "Their earlier conversation with you is saved and included above.")
-    return "The shopper is a guest (not logged in); this chat is not saved."
+        who = (f"The shopper is logged in as {ctx.deps.first_name} {ctx.deps.last_name}. "
+               "Their earlier conversation with you is saved and included above.")
+    else:
+        who = "The shopper is a guest (not logged in); this chat is not saved."
+    return who + " " + viewing_note(ctx.deps.viewing_product_id)
+
+
+def viewing_note(product_id: str | None) -> str:
+    """Tells the agent which product page is open, so "this" and "it" make sense."""
+    info = product_info(product_id) if product_id else None
+    if info is None:
+        return "They are not on a product page right now."
+    return (f'They are looking at the product page for "{info.name}" (product_id {info.product_id}, '
+            f"{info.garment_type}, ${info.price:.2f}, colors: {', '.join(info.colors)}). "
+            '"This", "it" or "this one" means that product unless they say otherwise.')
 
 
 @shop_agent.tool
@@ -87,15 +104,39 @@ NOT_FOUND = "No product matches {key!r}. Use find_products first to get a valid 
 
 
 @shop_agent.tool_plain
-def find_products(query: str, max_price: float | None = None, browse: bool = False) -> list[ProductSummary]:
-    """Search the catalogue. query: product words only, e.g. "navy hockey hoodie" or "mom" (leave sizes out).
-    max_price: only items at or under this price.
-    browse: True for "what X do you have?" questions; returns up to 30 matches instead of 8.
-    Each match has product_id, price and sizes_in_stock. Sold-out sizes are simply missing from
-    sizes_in_stock; the product is still one we carry."""
+def find_products(
+    query: str = "",
+    category: Category | None = None,
+    color: str | None = None,
+    color_anywhere: bool = False,
+    min_price: float | None = None,
+    max_price: float | None = None,
+    sort_by: SortBy = "relevance",
+    browse: bool = False,
+) -> list[ProductSummary]:
+    """Search the catalogue. Every argument is optional; combine them to match what the shopper describes.
+    query: descriptive words, e.g. "vintage bulldog", "mom", "hockey", "zip" (leave sizes and colors out).
+    category: hoodie, crewneck, t-shirt, long-sleeve, quarter-zip or jacket.
+    color: the garment's own color, e.g. "navy", "gray", "cream". color_anywhere=true also matches
+      print/trim colors (e.g. red lettering on a gray shirt).
+    min_price / max_price: price limits. sort_by: relevance, price_low, price_high, most_in_stock, name.
+    browse: true for "what X do you have?" questions; returns up to 30 instead of 8.
+    Each match has main_color, accent_colors, price, sizes_in_stock and total_in_stock. Sold-out sizes
+    are simply missing from sizes_in_stock; the product is still one we carry."""
     # No size filter on purpose: filtering hid products whose size was sold out,
     # and the agent then wrongly said "we don't carry that".
-    return search_products(query, max_price=max_price, limit=30 if browse else 8)
+    return search_products(
+        query, max_price=max_price, min_price=min_price, color=color, color_anywhere=color_anywhere,
+        category_filter=category, sort_by=sort_by, limit=30 if browse else 8,
+    )
+
+
+@shop_agent.tool_plain
+def catalogue_overview() -> CatalogueOverview:
+    """What the store carries overall: product count, each category's count and price range, and every
+    garment color and print color with counts. Use for "what colors do you have?", "do you have anything
+    in pink?" (to offer the closest real colors), "what's your cheapest…?" or "what kinds of items?"."""
+    return get_catalogue_overview()
 
 
 @shop_agent.tool_plain
