@@ -22,6 +22,12 @@ From the `HMW 4` folder, in two terminals:
 - Backend: `python -m uvicorn backend.main:app --reload --port 8000`
 - Frontend: `npm run dev --prefix frontend` → http://localhost:5173
 
+## AV style for answer files (`output/harness.md`)
+
+- Every answer the user writes is marked `🛑 **Adrian:**`; empty answer cells keep that marker so they know where to type.
+- Make answers quick to read with headers, `---` dividers and **bold** key phrases. Formatting only: never change the user's words (typos stay).
+- Keep the file UTF-8; Notepad/Word may re-save it as Windows-1252, so check and convert back after the user edits.
+
 ## Reminders
 
 - After the user reviews the tables (`notes/database_review.md`), remind them to start `output/harness.md` with its first section: each table and why each field matters for the shop or the chatbot, written by the user. Later problems add sections for models, tools, safety and specs (as in HMW 2 and HMW 3), so leave room for them.

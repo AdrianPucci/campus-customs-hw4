@@ -323,3 +323,25 @@ can we create the output/ harness.md file for me to put my answers into? Or shou
 **Assistant response:**
 
 Confirmed `output/harness.md` is the right place (same as Homework 2 and 3). Created it as a blank template: a Database section with a table for each of `catalogue`, `inventory`, `users` (and optional `chat_messages`) listing every field with an empty "Why it matters" column for the user to fill in, plus empty Models, Tools, Safety and Specs sections for later problems. Opened it in the Files pane.
+
+## Prompt 33
+
+**User prompt:**
+
+I filled in the database section of output/harness.md. Check it.
+
+**Assistant response:**
+
+Read `output/harness.md` on disk: every "Why it matters" cell is still empty and the file hasn't changed since the template was created. No other saved copy was found. Asked the user to save the file or paste their answers, and to say whether the reply button was clicked before writing.
+
+**Later correction (Prompt 34):** The user had saved their answers after all: one overview paragraph inside the template's comment, in Windows-1252 encoding.
+
+## Prompt 34
+
+**User prompt:**
+
+Hey in the harness.md file. I need you to make it more AV style so I can see some standouts. Can you put my name with the red stop sign everywhere I add an answer? Also I need some of the things I add to be in bold, headers etc so it is a quicker read. Can you do that?
+
+**Assistant response:**
+
+Restyled `output/harness.md`: moved the user's overview paragraph out of the hidden HTML comment into an "Adrian's overview" section, split into one bullet per table with the user's words unchanged, and bolded key phrases. Added a `🛑 **Adrian:**` marker to every answer slot and a key line at the top. Converted the file from Windows-1252 back to UTF-8. Saved the "AV style" rules in `CLAUDE.md`.
