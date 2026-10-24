@@ -599,3 +599,33 @@ problem 9
 **Assistant response:**
 
 The message had only the problem number, with no description, so asked the user to type what Problem 9 asks in their own words before building anything.
+
+## Prompt 60
+
+**User prompt:**
+
+great, we are going to add some features to the core shop. I would like to impliment a few front end usability improments and some agent backend improvements.
+
+**Assistant response:**
+
+Asked for the specific improvements from the assignment, and offered a short list of ideas the project could use (front end: search, filter and sort on the Products page, a size picker, a "New chat" button, loading and empty states; backend: a chat rate limit, a test-question script, streaming replies, a model tier for harder questions). Nothing built yet.
+
+## Prompt 61
+
+**User prompt:**
+
+Can you and I work together on some ideas? Pull up the shop if you will
+
+**Assistant response:**
+
+Started both servers (backend on 8000, frontend on 5173) and opened the shop's Home page in the Browser pane. Pointed out what looks thin from a shopper's view (a mostly empty Home page, a Products page with no search or filters, a chat button with no hint of what to ask) as starting points for brainstorming. Nothing changed.
+
+## Prompt 62
+
+**User prompt:**
+
+yes and we need the chatbot open
+
+**Assistant response:**
+
+Opened the chat panel in the Browser pane. The pane is phone-width right now, which shows a usability issue: on a phone the open chat covers almost the whole page, so cards the agent finds are hidden behind it. Listed this with other observations for brainstorming. Nothing changed.
