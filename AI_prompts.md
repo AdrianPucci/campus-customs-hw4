@@ -891,3 +891,13 @@ I do need to turn this in so can you send me the url or do we have to be 100% fi
 **Assistant response:**
 
 Gave the URL to submit right away (https://github.com/AdrianPucci/campus-customs-hw4); later pushes update the same link. Pushed the finished harness right after.
+
+## Prompt 89
+
+**User prompt:**
+
+when I click on the link above it doesn't work when I turned it in
+
+**Assistant response:**
+
+Checked: the repo URL itself works and the repo is public. The likely cause is the bold markdown around the link in the previous reply, which can attach the stars to the URL (`...hw4**` returns 404). Gave the plain URL to copy and paste.
