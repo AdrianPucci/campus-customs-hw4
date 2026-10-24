@@ -65,14 +65,15 @@ NOT_FOUND = "No product matches {key!r}. Use find_products first to get a valid 
 
 
 @shop_agent.tool_plain
-def find_products(query: str, max_price: float | None = None) -> list[ProductSummary]:
+def find_products(query: str, max_price: float | None = None, browse: bool = False) -> list[ProductSummary]:
     """Search the catalogue. query: product words only, e.g. "navy hockey hoodie" or "mom" (leave sizes out).
     max_price: only items at or under this price.
-    Returns up to 8 matches with product_id, price and sizes_in_stock. Sold-out sizes are simply
-    missing from sizes_in_stock; the product is still one we carry."""
+    browse: True for "what X do you have?" questions; returns up to 30 matches instead of 8.
+    Each match has product_id, price and sizes_in_stock. Sold-out sizes are simply missing from
+    sizes_in_stock; the product is still one we carry."""
     # No size filter on purpose: filtering hid products whose size was sold out,
     # and the agent then wrongly said "we don't carry that".
-    return search_products(query, max_price=max_price)
+    return search_products(query, max_price=max_price, limit=30 if browse else 8)
 
 
 @shop_agent.tool_plain

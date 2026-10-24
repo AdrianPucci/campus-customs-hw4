@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { sendChatMessage, type ChatMessage } from '../api/chat'
+import { useChatResults } from '../chat/ChatResultsContext'
+
+// More matches than this are shown only on the page, not squeezed into the chat panel.
+const MAX_CARDS_IN_PANEL = 4
 
 const GREETING: ChatMessage = {
   role: 'assistant',
@@ -19,6 +23,7 @@ export default function ChatWidget() {
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
+  const { showResults } = useChatResults()
 
   // Keep the newest message in view.
   useEffect(() => {
@@ -38,6 +43,8 @@ export default function ChatWidget() {
       // The greeting is just for the screen; the agent only needs the real conversation.
       const reply = await sendChatMessage(text, messages.slice(1))
       setMessages((prev) => [...prev, reply])
+      // Matching items also appear as full cards on the page itself.
+      if (reply.products?.length) showResults({ question: text, products: reply.products })
     } catch (err) {
       setMessages((prev) => [...prev, { role: 'assistant', content: `Sorry, ${(err as Error).message}` }])
     } finally {
@@ -61,7 +68,10 @@ export default function ChatWidget() {
               <div key={i} className={`chat-turn ${m.role}`}>
                 <div className={`chat-bubble ${m.role}`}>{withBold(m.content)}</div>
                 {/* Matching items from the agent, each linking to its product page */}
-                {m.products && m.products.length > 0 && (
+                {m.products && m.products.length > MAX_CARDS_IN_PANEL && (
+                  <p className="chat-note">See all {m.products.length} items on the page ↖</p>
+                )}
+                {m.products && m.products.length > 0 && m.products.length <= MAX_CARDS_IN_PANEL && (
                   <div className="chat-products">
                     {m.products.map((p) => (
                       <Link key={p.product_id} to={`/products/${p.product_id}`} className="chat-product">

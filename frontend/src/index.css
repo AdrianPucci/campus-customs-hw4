@@ -238,6 +238,86 @@ h1 {
   margin: 0;
 }
 
+/* ---------- Matching items from chat (top of any page) ---------- */
+.matching {
+  background: var(--surface);
+  border: 2px solid var(--yale-blue);
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+  scroll-margin-top: 1rem;
+  animation: matching-in 0.3s ease-out;
+}
+
+@keyframes matching-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.matching-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.matching-header h2 {
+  margin: 0;
+  color: var(--yale-blue);
+  font-size: 1.25rem;
+}
+
+.matching-question {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 1rem;
+}
+
+.matching-close {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.match-card {
+  background: #fff;
+}
+
+.match-card h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.match-info {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0.35rem 0;
+}
+
+.match-sizes {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--yale-blue);
+  margin: 0;
+}
+
+.match-sizes.sold-out {
+  color: var(--danger);
+}
+
+.chat-note {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--yale-blue);
+  margin: 0;
+}
+
 /* ---------- Single product page ---------- */
 .back-link {
   display: inline-block;

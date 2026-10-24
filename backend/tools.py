@@ -89,6 +89,14 @@ def search_products(query: str, max_price: float | None = None, limit: int = 8) 
     return [_summary(p) for _, p in scored[:limit]]
 
 
+def short_info(description: str, max_chars: int = 110) -> str:
+    """First sentence of the description, cut at a word boundary if it's long."""
+    first = description.split(". ")[0].rstrip(".")
+    if len(first) <= max_chars:
+        return first + "."
+    return first[:max_chars].rsplit(" ", 1)[0].rstrip(",") + "…"
+
+
 def to_card(p: dict) -> ProductCard:
     in_stock = [s["size"] for s in p["inventory"] if s["quantity"] > 0]
     return ProductCard(
@@ -97,6 +105,7 @@ def to_card(p: dict) -> ProductCard:
         garment_type=p["garment_type"],
         price=p["price"],
         image_url=p["image_url"],
+        short_info=short_info(p["description"]),
         sizes_in_stock=in_stock,
         in_stock=bool(in_stock),
     )

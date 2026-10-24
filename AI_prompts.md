@@ -485,3 +485,23 @@ Problem 6 Tools: Product info and Stock:  I need to give the agent tools that lo
 **Assistant response:**
 
 Gave the agent three typed tools that read `campus_customs.db` live. `find_products(query, max_price)` returns `ProductSummary` list. `get_product_info(product_id)` returns `ProductInfo` with description, price, type and colors. `check_stock(product_id, size)` returns `StockReport` with units per size (XS-XXL, including 0 = sold out), total, and the requested size's count. The return types are in `backend/models.py`; lookups are in `backend/tools.py` and also accept an exact product name. Updated the Tools section of `prompts/prompt.md` (which tool to use when, quote numbers exactly). Tested the tools directly, then through the agent with tool calls printed: Yale Mom Hoodie (find, then get_product_info) gave $68; Yale Dad Hoodie in L (find, then check_stock size L) gave 20; Pierson College Crewneck per size gave XS 12, S 2, M 8, XXL 2, with L and XL sold out. All match the database. Also checked on the live site: Morse Logo T in XL showed 25 at $32.
+
+## Prompt 49
+
+**User prompt:**
+
+now want to add a cool feature to the site. When a customer asks about a type of item - for example: "what hoodies do you have?" - the agent should search the catalogue and the website should dynamically show those matching items as product cards (image name, price, short info)
+
+**Assistant response:**
+
+Added a "From your chat: N matching items" section that appears at the top of whatever page is open, with full product cards (image, name, price, short info from the first sentence of the description, sizes in stock), each linking to its product page. Backend: `ProductCard` got `short_info`; `find_products` takes `browse=true` for "what X do you have?" questions and returns up to 30 matches; `ShopReply` allows up to 30 product ids; the prompt tells the agent to include every match and keep its text short. Front end: `chat/ChatResultsContext.tsx` shares results between the chat panel and the new `components/MatchingProducts.tsx` (scrolls into view, × to hide). The chat panel shows small cards for up to 4 items, otherwise "See all N items on the page". Tested "what hoodies do you have?": 27 cards (every hoodie in the catalogue), no broken images, and the reply "27 hoodies, $45 to $88" is correct.
+
+## Prompt 50
+
+**User prompt:**
+
+can you show me how this looks?
+
+**Assistant response:**
+
+Took a screenshot of the browser after asking "what hoodies do you have?" and opened the Browser pane so the user can see the matching-items section and chat panel live.

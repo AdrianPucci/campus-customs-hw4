@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import ChatWidget from './components/ChatWidget'
+import MatchingProducts from './components/MatchingProducts'
 import NavBar from './components/NavBar'
 import AboutPage from './pages/AboutPage'
 import CreateAccountPage from './pages/CreateAccountPage'
@@ -14,6 +15,7 @@ export default function App() {
     <>
       <NavBar />
       <main className="page">
+        <MatchingProducts />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<ProductsPage />} />

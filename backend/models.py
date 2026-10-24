@@ -21,6 +21,7 @@ class ProductCard(BaseModel):
     garment_type: str
     price: float
     image_url: str = Field(description='Browser path to the photo, e.g. "/media/products/yale-mom-hoodie.jpg"')
+    short_info: str = Field(description="First sentence of the description, trimmed for a card.")
     sizes_in_stock: list[Size]
     in_stock: bool
 
@@ -89,7 +90,8 @@ class ShopReply(BaseModel):
     message: str = Field(description="Friendly answer to the shopper. Plain text with **bold** for names and prices.")
     product_ids: list[str] = Field(
         default_factory=list,
-        max_length=8,
-        description="product_id of each catalogue item the answer recommends or talks about, best match first. "
+        max_length=30,
+        description="product_id of each catalogue item to show as a card on the page, best match first. "
+        "For browsing questions (\"what hoodies do you have?\") include every good match, up to 30. "
         "Only ids returned by a tool. Empty if no product is relevant.",
     )

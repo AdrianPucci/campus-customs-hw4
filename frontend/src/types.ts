@@ -11,6 +11,7 @@ export interface ProductCard {
   garment_type: string
   price: number
   image_url: string
+  short_info: string // first sentence of the description
   sizes_in_stock: string[]
   in_stock: boolean
 }
