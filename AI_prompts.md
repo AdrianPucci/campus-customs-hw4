@@ -395,3 +395,13 @@ sweet!
 **Assistant response:**
 
 Acknowledged. Noted the open question about the existing accounts' hash iteration count and asked for the next problem.
+
+## Prompt 40
+
+**User prompt:**
+
+new accounts go into the user table. secure the passwords so hackers (either human or AI) can't access, confirm how that will be done. got it?
+
+**Assistant response:**
+
+Confirmed that new accounts are saved in the `users` table and strengthened `backend/auth.py`: new hashes use 600,000 PBKDF2-SHA256 iterations (OWASP's recommendation) with a 128-bit random salt, stored as `pbkdf2_sha256$600000$salt$hash`. The given accounts' older 3-part format still verifies. Added a login limit (5 failed tries per email or address in 15 minutes returns "Too many failed attempts") and a 128-character password cap. Tested: right and wrong passwords, a different hash for the same password, the old format, lockout on the 6th try, and that the database can't be downloaded from any URL tried. Explained the other layers already in place: the hash is never sent to the browser, SQL uses placeholders, the same error is shown for a wrong email or password, the database is gitignored, and the future chatbot agent's tools will never be able to read the `users` table (noted in `CLAUDE.md` for the harness Safety section).

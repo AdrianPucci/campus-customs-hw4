@@ -1,22 +1,36 @@
 """Create-account / log-in endpoints.
 
-Passwords are never stored. The users table keeps "pbkdf2_sha256$<salt>$<hash>":
-PBKDF2-HMAC-SHA256 of the password with a random per-user salt.
+Passwords are never stored. The users table keeps only a PBKDF2-HMAC-SHA256 hash
+with a random per-user salt:
+  new accounts:   "pbkdf2_sha256$<iterations>$<salt>$<hash>"
+  given accounts: "pbkdf2_sha256$<salt>$<hash>" (older format, no iteration count)
 """
 import hashlib
 import hmac
 import re
 import secrets
 import sqlite3
+import time
 
-from fastapi import APIRouter, Cookie, HTTPException, Response
+from fastapi import APIRouter, Cookie, HTTPException, Request, Response
 from pydantic import BaseModel
 
 from .db import get_db, get_db_writable
 
-# The stored format has no slot for the iteration count, so every hash must use
-# the same number. Change it here only if the course gives a different one.
-PBKDF2_ITERATIONS = 100_000
+# Work factor for new hashes (OWASP's current recommendation for PBKDF2-SHA256).
+# Each guess costs an attacker this many rounds, so stolen hashes are slow to crack.
+PBKDF2_ITERATIONS = 600_000
+# The given accounts' hashes don't record their count. Change this one number
+# if the course says which count it used.
+LEGACY_ITERATIONS = 100_000
+
+MAX_PASSWORD_LENGTH = 128  # stops absurdly long inputs from tying up the server
+
+# Login attempt limit: after 5 failures for one email (or from one address)
+# within 15 minutes, further attempts are refused until the window passes.
+MAX_FAILED_LOGINS = 5
+LOCKOUT_SECONDS = 15 * 60
+FAILED_LOGINS: dict[str, list[float]] = {}
 
 SESSION_COOKIE = "cc_session"
 # token -> user id. Kept in memory, so everyone is logged out when the server restarts.
@@ -39,22 +53,37 @@ class LoginRequest(BaseModel):
     password: str
 
 
-def hash_password(password: str, salt: str | None = None) -> str:
-    salt = salt or secrets.token_hex(8)
-    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), PBKDF2_ITERATIONS)
-    return f"pbkdf2_sha256${salt}${digest.hex()}"
+def _pbkdf2(password: str, salt: str, iterations: int) -> str:
+    return hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), iterations).hex()
+
+
+def hash_password(password: str) -> str:
+    salt = secrets.token_hex(16)  # 128 random bits, different for every account
+    return f"pbkdf2_sha256${PBKDF2_ITERATIONS}${salt}${_pbkdf2(password, salt, PBKDF2_ITERATIONS)}"
 
 
 def verify_password(password: str, stored: str) -> bool:
-    try:
-        method, salt, _ = stored.split("$")
-    except ValueError:
+    parts = stored.split("$")
+    if parts[0] != "pbkdf2_sha256":
         return False
-    if method != "pbkdf2_sha256":
+    if len(parts) == 4 and parts[1].isdigit():  # new format
+        _, iterations, salt, expected = parts
+        actual = _pbkdf2(password, salt, int(iterations))
+    elif len(parts) == 3:  # given accounts
+        _, salt, expected = parts
+        actual = _pbkdf2(password, salt, LEGACY_ITERATIONS)
+    else:
         return False
     # compare_digest takes the same time whether or not the start matches,
     # so the response time doesn't leak how close a guess was.
-    return hmac.compare_digest(hash_password(password, salt), stored)
+    return hmac.compare_digest(actual, expected)
+
+
+def _recent_failures(key: str) -> list[float]:
+    cutoff = time.time() - LOCKOUT_SECONDS
+    recent = [t for t in FAILED_LOGINS.get(key, []) if t > cutoff]
+    FAILED_LOGINS[key] = recent
+    return recent
 
 
 def public_user(row: sqlite3.Row) -> dict:
@@ -83,8 +112,8 @@ def register(body: RegisterRequest, response: Response) -> dict:
         raise HTTPException(400, "First and last name are required.")
     if not EMAIL_RE.match(email):
         raise HTTPException(400, "Please enter a valid email address.")
-    if len(body.password) < 8:
-        raise HTTPException(400, "Password must be at least 8 characters.")
+    if not 8 <= len(body.password) <= MAX_PASSWORD_LENGTH:
+        raise HTTPException(400, f"Password must be 8 to {MAX_PASSWORD_LENGTH} characters.")
 
     with get_db_writable() as conn:
         try:
@@ -101,14 +130,27 @@ def register(body: RegisterRequest, response: Response) -> dict:
 
 
 @router.post("/login")
-def login(body: LoginRequest, response: Response) -> dict:
+def login(body: LoginRequest, request: Request, response: Response) -> dict:
     email = body.email.strip().lower()
+    keys = [f"email:{email}", f"ip:{request.client.host if request.client else '?'}"]
+    if any(len(_recent_failures(k)) >= MAX_FAILED_LOGINS for k in keys):
+        raise HTTPException(429, "Too many failed attempts. Please wait 15 minutes and try again.")
+
     with get_db() as conn:
         row = conn.execute("SELECT * FROM users WHERE lower(email) = ?", (email,)).fetchone()
     # Same message for "no such email" and "wrong password", so the form
     # can't be used to find out which emails have accounts.
-    if row is None or not verify_password(body.password, row["password_hash"]):
+    if (
+        row is None
+        or len(body.password) > MAX_PASSWORD_LENGTH
+        or not verify_password(body.password, row["password_hash"])
+    ):
+        for k in keys:
+            FAILED_LOGINS.setdefault(k, []).append(time.time())
         raise HTTPException(401, "Email or password is incorrect.")
+
+    for k in keys:
+        FAILED_LOGINS.pop(k, None)
     start_session(response, row["id"])
     return public_user(row)
 

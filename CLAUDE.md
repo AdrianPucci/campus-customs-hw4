@@ -33,6 +33,7 @@ From the `HMW 4` folder, in two terminals:
 - After the user reviews the tables (`notes/database_review.md`), remind them to start `output/harness.md` with its first section: each table and why each field matters for the shop or the chatbot, written by the user. Later problems add sections for models, tools, safety and specs (as in HMW 2 and HMW 3), so leave room for them.
 - Deadline: about 6.5 hours from the morning of 2026-10-24. Keep explanations short.
 - `gh` is installed but not signed in; the user runs `gh auth login` before pushing.
+- Password security (Prompt 40): when building the chatbot agent, its tools must only read `catalogue` and `inventory` (and the current user's own chat history), never the `users` table or `password_hash`, so a prompt-injected or curious AI can't reach the hashes. Put this in the harness Safety section.
 
 ## Before submitting (zip checklist)
 
