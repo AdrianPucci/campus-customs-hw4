@@ -66,45 +66,79 @@
 
 ## 2. Models
 
-_To be added in a later problem._
+> Drafted with the AI assistant from the code; 🛑 marks my notes.
 
-## 3. Tools
+| Item | Choice | Why |
+|---|---|---|
+| **Model** | OpenAI **`gpt-6-luna`** (6 series) | Strong at tool calling and following a long system prompt |
+| **Gateway** | **Portkey** (`PORTKEY_API_KEY`) | Course key; one place for usage and cost |
+| **Framework** | **PydanticAI** `Agent` (`backend/agent.py`) | Typed tools, typed output, per-shopper deps, streaming events |
+| **System prompt** | `backend/prompts/prompt.md` | Voice, honesty rules, tools, store info, safety |
+| **Cache** | Portkey cache forced off | Cached replies broke repeated questions; stock changes anyway |
 
-> Agent tools live in `backend/agent.py`; the lookups they call are in `backend/tools.py`.
-> **All tools are read-only** and touch only `catalogue` and `inventory`, never `users`.
+**Structured types** (`backend/models.py`): `ShopReply` is the agent's required output (`message` + `product_ids`); `ProductSummary`, `ProductInfo`, `StockReport`, `CatalogueOverview` are tool results; `ProductCard` is a page card **built from the database, never by the AI**; `ChatRequest` / `ChatResponse` connect the website and backend; `AuditEntry` is one audit-trail line.
 
-### The agent's tools
+**Who is chatting (deps):** `ShopperDeps` carries the **user id, name, email** and the **open product page**, filled **from the login cookie, never from chat text**. The tool `get_shopper_profile` returns the shopper's own email when asked.
 
-| Tool | Reads | Returns | Used when the shopper asks… |
-|---|---|---|---|
-| `find_products(query, max_price, browse)` | `catalogue` + `inventory` | list of `ProductSummary` (id, name, type, **price**, sizes in stock); up to 8, or **up to 30 with `browse=true`** | "what hoodies do you have?", "gift for my dad" |
-| `get_product_info(product_id)` | `catalogue` | `ProductInfo` (**description**, **price**, type, colors) | "what does it look like?", "how much is…?" |
-| `check_stock(product_id, size)` | `catalogue` + `inventory` | `StockReport` (**quantity per size** XS–XXL, total, the asked size's count) | "do you have it in M?", "how many left?" |
+**Loop limits:** max **8 model calls** per message; last **12** turns as history.
 
 🛑 **Adrian:**
 
+## 3. Tools
+
+> Read-only lookups on `catalogue` and `inventory` (`backend/tools.py`); never the `users` table.
+
+| Tool | Returns | Used when the shopper asks… |
+|---|---|---|
+| `find_products(query, category, color, min/max_price, sort_by, browse)` | Matches with **price**, colors, sizes in stock; up to 30 when browsing | "what hoodies do you have?", "cheapest hoodie", "cream crewnecks" |
+| `get_product_info(product_id)` | **Description**, **price**, type, colors | "what does it look like?", "how much is it?" |
+| `check_stock(product_id, size)` | **Quantity per size** XS-XXL | "do you have it in M?", "how many left?" |
+| `catalogue_overview()` | Categories with price ranges, every color | "what colors do you have?", "anything in pink?" |
+| `get_shopper_profile()` | The logged-in shopper's own name and email | "what email is my account under?" |
+
+**Page context:** "this" / "it" = the product page that's open.
+
 ### How search results reach the page
 
-1. **Shopper asks** in the chat panel → the website sends `POST /api/chat` with the message and recent history.
-2. **Agent searches** with its tools and returns a structured `ShopReply`: a short `message` + the matching **`product_ids`**.
-3. **Backend builds the cards** (`main.py`): looks each id up in the database and returns a `ProductCard` per product (image, name, **price**, short info, sizes in stock). **Ids that don't exist are dropped**, so the AI can't put a fake product on the page.
-4. **Website shows them**: `ChatWidget` hands the cards to a shared `ChatResultsContext`; the **Matching items** section (`MatchingProducts.tsx`) shows them at the **top of whatever page is open** (up to 4 also appear inside the chat panel).
-5. **Click a card → detail page** at `/products/<product_id>` (the Problem 3 single-item page): **large image + full description, price, colors and stock per size**. The page opens scrolled to the top; the matches shrink to a **"← Back to your N matching items"** bar so the detail view stays in sight.
+1. The chat sends `POST /api/chat/stream` (message, history, open page).
+2. Each tool call streams a **live status** ("🔎 Searching the catalogue…").
+3. The agent returns `ShopReply` with **`product_ids`**.
+4. The backend builds `ProductCard`s **from the database**; unknown ids are dropped.
+5. Cards appear in **Matching items** at the top of the page; clicking one opens `/products/<id>` (large image, description, price, stock per size).
 
-```
-Chat panel ─POST /api/chat─► FastAPI ─► Agent + tools ─► campus_customs.db
-     ▲                          │ product_ids → ProductCards (from the DB)
-     └──── reply + cards ◄──────┘
-Cards on page ─click─► /products/<id> ─GET /api/products/<id>─► detail view
-```
+**Chat history:** logged-in shoppers' chats are saved in `chat_messages` and reloaded; guests' are never saved.
 
 🛑 **Adrian:**
 
 ## 4. Safety
 
-_To be added in a later problem._
+> Based on the **OWASP Top 10 for LLM Applications**; code in `backend/safety.py`, rules in `prompt.md`.
+
+| Risk | What we do |
+|---|---|
+| **Too many requests / cost** | Guests **6/min, 30/hour** per IP; shoppers **12/min, 120/hour**; site **600/hour**; one message at a time; **HTTP 429** + "Whoa, Bulldog! 🐾" |
+| **Sensitive data** | **Card numbers, SSNs, passwords removed before** the AI or database sees them, with a 🔒 notice |
+| **Prompt injection** | Attempts logged; read-only tools and prompt rules keep the agent safe |
+| **Data leaks** | Tools can't read `users`; only the shopper's own name and email; identity from the login |
+| **Passwords** | PBKDF2-SHA256, 600,000 rounds, random salt; 5 failed logins → 15-min lockout |
+| **Made-up answers** | Prices and stock only from tools; cards from the database |
+| **Unsafe content** | On-topic, family-friendly, no medical or legal advice, crisis → 911 / 988 |
+| **Audit** | `output/audit_trail.json` (every agent run); safety log in `data/` |
+| **Secrets** | `.env`, database and product images gitignored |
+
+🛑 **Adrian:**
 
 ## 5. Specs
 
-_To be added in a later problem._
+**Stack:** React + Vite + TypeScript · FastAPI (run from `backend/`) · PydanticAI · SQLite · Portkey → `gpt-6-luna`.
 
+| API | Does |
+|---|---|
+| `GET /api/products`, `/api/products/{id}` | Catalogue with stock and image URL |
+| `POST /api/chat/stream` (and `/api/chat`) | Chat: live status, then reply + product cards |
+| `GET /api/chat/history` | Logged-in shopper's saved chat |
+| `POST /api/auth/register`, `/login`, `/logout`; `GET /api/auth/me` | Accounts |
+
+**Acceptance checks (passed; see `app_check.html`):** stock by size matches the database (Yale Dad Hoodie); "what hoodies?" → 27 cards = all 27 hoodies; cards open the detail page; seasonal chips and live status; accounts and saved chat; card number removed, 7th guest message → 429.
+
+🛑 **Adrian:**

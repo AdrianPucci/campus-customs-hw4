@@ -871,3 +871,23 @@ I've done the steps in Github can you vaildate the link for me to post?
 **Assistant response:**
 
 Found the account name from the saved GitHub sign-in (`git credential-manager github list`, name only, no token) and confirmed the new repo exists, is public and was empty: https://github.com/AdrianPucci/campus-customs-hw4. Before pushing: the user's edits to `output/harness.md` and `notes/database_review.md` had been re-saved by Word as UTF-16 (GitHub would show them as binary), so converted both to UTF-8 with every character unchanged (verified). In `harness.md` the new answers had landed outside the table's cells and three rows had lost their cells, so moved the user's words into proper 🛑 Adrian cells (header note as a line above the table; "Item name and type" for name, "Color descriptor" for colors; search_tags, image_file_path and price restored as empty answer cells), with no words changed (checked). Then pushed `main` and checked the live repo page.
+
+## Prompt 87
+
+**User prompt:**
+
+Let's finish harness.md first.
+
+**Assistant response:**
+
+Filled the harness sections 2-5 (Models, Tools, Safety, Specs) from the code as drafts with 🛑 Adrian slots, leaving the database answers untouched. Committed and pushed.
+
+## Prompt 88
+
+**User prompt:**
+
+I do need to turn this in so can you send me the url or do we have to be 100% first? I have 10 more minutes
+
+**Assistant response:**
+
+Gave the URL to submit right away (https://github.com/AdrianPucci/campus-customs-hw4); later pushes update the same link. Pushed the finished harness right after.
