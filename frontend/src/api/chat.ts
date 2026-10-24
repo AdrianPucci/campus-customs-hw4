@@ -1,17 +1,23 @@
+import type { Product } from '../types'
+
 export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
+  products?: Product[] // items the assistant matched, shown under its reply
 }
 
-// STUB: answers locally for now. In a later problem this becomes
-//   fetch('/api/chat', { method: 'POST', body: JSON.stringify({ message, history }) })
-// so the PydanticAI agent on the backend writes the reply. The chat panel only
-// calls this function, so nothing else has to change when that happens.
+// Sends the message plus earlier turns to the backend's PydanticAI agent.
+// The session cookie goes along automatically, so the agent knows who is logged in.
 export async function sendChatMessage(message: string, history: ChatMessage[]): Promise<ChatMessage> {
-  void history // will be sent to the backend later
-  await new Promise((resolve) => setTimeout(resolve, 400)) // feels like a real request
-  return {
-    role: 'assistant',
-    content: `Thanks for asking about "${message}". I'm not connected to the shop yet. Soon I'll be able to find merch and check sizes and stock for you.`,
-  }
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message,
+      history: history.map(({ role, content }) => ({ role, content })), // text only, no product data
+    }),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'The assistant is unavailable right now.')
+  return { role: 'assistant', content: data.reply, products: data.products }
 }

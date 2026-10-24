@@ -405,3 +405,33 @@ new accounts go into the user table. secure the passwords so hackers (either hum
 **Assistant response:**
 
 Confirmed that new accounts are saved in the `users` table and strengthened `backend/auth.py`: new hashes use 600,000 PBKDF2-SHA256 iterations (OWASP's recommendation) with a 128-bit random salt, stored as `pbkdf2_sha256$600000$salt$hash`. The given accounts' older 3-part format still verifies. Added a login limit (5 failed tries per email or address in 15 minutes returns "Too many failed attempts") and a 128-character password cap. Tested: right and wrong passwords, a different hash for the same password, the old format, lockout on the 6th try, and that the database can't be downloaded from any URL tried. Explained the other layers already in place: the hash is never sent to the browser, SQL uses placeholders, the same error is shown for a wrong email or password, the database is gitignored, and the future chatbot agent's tools will never be able to read the `users` table (noted in `CLAUDE.md` for the harness Safety section).
+
+## Prompt 41
+
+**User prompt:**
+
+build the shop chatbot as a pydanticAI agent behind Fast API, pugged int the front end chat wiget. put the API app in the backend/ main.py for the file that we run on Uvicorn. Keep the agent in these four files next to it.
+
+**Assistant response:**
+
+Built the agent in `backend/`. `models.py` has the Pydantic types (`ChatRequest`, `ShopReply` structured output with message + product_ids, `ChatResponse`). `tools.py` has read-only catalogue/inventory lookups (keyword search, product details), shared with the product API and unable to touch `users`. `agent.py` has the PydanticAI agent on Portkey (`gpt-6-luna`) with tools `find_products` and `check_stock`, chat history, the shopper's first name, and an 8-request cap. The system prompt includes the real store's returns policy and contact info from yalebulldogblue.com, honesty rules (prices and stock only from tools) and safety rules. Copied the user's Portkey `.env` from HMW 3 (gitignored) and added `.env.example`.
+
+## Prompt 42
+
+**User prompt:**
+
+here is the list: 1. backend/ prompts/ prompt.md (system prompts) grow this same file later 2. backend/ agent.py - agent entry/ writing 3. backend/models.py-PYdantic /PydanticAI Structured types
+
+**Assistant response:**
+
+Moved the system prompt from `prompts.py` into `backend/prompts/prompt.md`, which `agent.py` reads at startup. Assumed the fourth file is `backend/tools.py`. Testing found an honesty bug: a size filter hid a product whose size was sold out, so the agent said "we don't carry it". Removed the filter and added prompt rules (find the named product first, retry simpler searches, colors are one colorway rather than choices). Retested: the sold-out answer is now correct, the budget search works, and a prompt-injection request for user emails and hashes was refused.
+
+## Prompt 43
+
+**User prompt:**
+
+In main.py expose a chat route so a message from the website returns a reply from the agent. If we get working and you see other suggestions for this process please suggest. I will possibly add other items if needed as well for documentation. you are using my API key correct?
+
+**Assistant response:**
+
+Added `POST /api/chat` in `main.py`: it takes the message and history, adds the logged-in shopper's first name from the session, runs the agent, and returns the reply plus full data for only real product ids (made-up ids are dropped). Connected the chat widget (`api/chat.ts`, `ChatWidget.tsx`): replies show **bold** safely, and matching products appear as small cards with photo and price that link to their product page. Confirmed the user's own Portkey key (from `.env`) is used. Tested in the browser: "show me some hockey hoodies" returned 2 correct cards, and the follow-up "is the first one in stock in large?" correctly said sold out. Gave suggestions for next steps.

@@ -3,17 +3,20 @@
 Run from the HMW 4 folder:
     uvicorn backend.main:app --reload --port 8000
 """
-import json
-import sqlite3
+import logging
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Cookie, FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
+from pydantic_ai.exceptions import UsageLimitExceeded
 
+from .agent import ask_shop_agent
+from .auth import SESSIONS
 from .auth import router as auth_router
 from .db import DATA_DIR, get_db
+from .models import ChatRequest, ChatResponse
+from .tools import get_product_details, load_products
 
-# Sizes sort in this order, not alphabetically (alphabetical would put L before S).
-SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL"]
+log = logging.getLogger("campus_customs")
 
 app = FastAPI(title="Campus Customs API")
 
@@ -24,41 +27,36 @@ app.mount("/media/products", StaticFiles(directory=DATA_DIR / "products"), name=
 app.include_router(auth_router)
 
 
-def product_to_dict(row: sqlite3.Row, inventory: list[sqlite3.Row]) -> dict:
-    """Turn a catalogue row into JSON-ready data with an image URL and stock per size."""
-    sizes = sorted(inventory, key=lambda r: SIZE_ORDER.index(r["size"]))
-    return {
-        "product_id": row["product_id"],
-        "name": row["name"],
-        "garment_type": row["garment_type"],
-        "description": row["description"],
-        "colors": json.loads(row["colors"]),  # stored as JSON text in the database
-        "search_tags": json.loads(row["search_tags"]),
-        "image_file_path": row["image_file_path"],
-        "image_url": "/media/" + row["image_file_path"],
-        "price": row["price"],
-        "inventory": [{"size": r["size"], "quantity": r["quantity"]} for r in sizes],
-        "total_stock": sum(r["quantity"] for r in sizes),
-    }
-
-
 @app.get("/api/products")
 def list_products() -> list[dict]:
-    with get_db() as conn:
-        products = conn.execute("SELECT * FROM catalogue ORDER BY name").fetchall()
-        stock: dict[str, list[sqlite3.Row]] = {}
-        for r in conn.execute("SELECT product_id, size, quantity FROM inventory"):
-            stock.setdefault(r["product_id"], []).append(r)
-    return [product_to_dict(p, stock.get(p["product_id"], [])) for p in products]
+    return load_products()
 
 
 @app.get("/api/products/{product_id}")
 def get_product(product_id: str) -> dict:
-    with get_db() as conn:
-        row = conn.execute("SELECT * FROM catalogue WHERE product_id = ?", (product_id,)).fetchone()
-        if row is None:
-            raise HTTPException(status_code=404, detail="Product not found")
-        inventory = conn.execute(
-            "SELECT size, quantity FROM inventory WHERE product_id = ?", (product_id,)
-        ).fetchall()
-    return product_to_dict(row, inventory)
+    product = get_product_details(product_id)
+    if product is None:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
+
+
+@app.post("/api/chat")
+async def chat(body: ChatRequest, cc_session: str | None = Cookie(default=None)) -> ChatResponse:
+    first_name = None
+    user_id = SESSIONS.get(cc_session or "")
+    if user_id is not None:
+        with get_db() as conn:
+            row = conn.execute("SELECT first_name FROM users WHERE id = ?", (user_id,)).fetchone()
+        first_name = row["first_name"] if row else None
+
+    try:
+        answer = await ask_shop_agent(body.message, body.history, first_name)
+    except UsageLimitExceeded:
+        return ChatResponse(reply="Sorry, that one took me too long. Could you ask it a simpler way?", products=[])
+    except Exception:
+        log.exception("Chat agent failed")
+        raise HTTPException(status_code=502, detail="The assistant is unavailable right now. Please try again.")
+
+    # Show only real products: drop any id the model made up, keep its order, no repeats.
+    ids = list(dict.fromkeys(answer.product_ids))
+    return ChatResponse(reply=answer.message, products=load_products(ids) if ids else [])
