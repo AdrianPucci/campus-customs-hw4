@@ -17,13 +17,15 @@
 
 ### `catalogue`: what we sell
 
+🛑 **Adrian:** General descriptors give the categories for each of the sub items that may be introduced by a user in the chat. Each is important for providing the customer with the feedback and items they are looking for.
+
 | Field | Why it matters (shop / chatbot) |
 |---|---|
 | `product_id` | 🛑 **Adrian:** gives the product id information, confirms it is a **unique item** |
-| `name` | 🛑 **Adrian:** |
+| `name` | 🛑 **Adrian:** Item name and type |
 | `garment_type` | 🛑 **Adrian:** what type of clothing |
 | `description` | 🛑 **Adrian:** the key descriptors |
-| `colors` | 🛑 **Adrian:** |
+| `colors` | 🛑 **Adrian:** Color descriptor |
 | `search_tags` | 🛑 **Adrian:** |
 | `image_file_path` | 🛑 **Adrian:** |
 | `price` | 🛑 **Adrian:** |
@@ -105,3 +107,4 @@ _To be added in a later problem._
 ## 5. Specs
 
 _To be added in a later problem._
+

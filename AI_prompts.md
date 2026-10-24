@@ -849,3 +849,25 @@ Matched the repo to the tree: moved `backend/requirements.txt` to the top level 
 **Assistant response:**
 
 Confirmed the local `data/` folder matches (database + `products/`, plus `hero/` media and the safety log) and that all of it is gitignored.
+
+## Prompt 85
+
+**User prompt:**
+
+Repo created, push it: https://github.com/
+
+**Assistant response:**
+
+The URL came through without the username and repo name (the reply button sends its text as written), so nothing was pushed. Asked for the full repository URL instead of guessing the account name.
+
+**Later note (Prompt 86):** The repo turned out to be https://github.com/AdrianPucci/campus-customs-hw4.
+
+## Prompt 86
+
+**User prompt:**
+
+I've done the steps in Github can you vaildate the link for me to post?
+
+**Assistant response:**
+
+Found the account name from the saved GitHub sign-in (`git credential-manager github list`, name only, no token) and confirmed the new repo exists, is public and was empty: https://github.com/AdrianPucci/campus-customs-hw4. Before pushing: the user's edits to `output/harness.md` and `notes/database_review.md` had been re-saved by Word as UTF-16 (GitHub would show them as binary), so converted both to UTF-8 with every character unchanged (verified). In `harness.md` the new answers had landed outside the table's cells and three rows had lost their cells, so moved the user's words into proper 🛑 Adrian cells (header note as a line above the table; "Item name and type" for name, "Color descriptor" for colors; search_tags, image_file_path and price restored as empty answer cells), with no words changed (checked). Then pushed `main` and checked the live repo page.

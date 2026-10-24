@@ -80,3 +80,11 @@ Try answering before you look back at the tables:
 4. `colors` looks like a list. Why can't Python loop over it straight out of the database?
 5. Two people try to sign up with the same email. What stops the second one?
 6. Which two fields together make sure an inventory row is never duplicated?
+
+
+
+## 1. `catalogue`: what we sell
+## 2. `inventory`: stock by size 
+## 3. `users`: shopper accounts
+## 4. `chat_messages`: saved conversations (bonus table)
+
