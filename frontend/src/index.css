@@ -8,6 +8,8 @@
   --surface: #f5f6f8;
   --border: #e3e5e8;
   --danger: #b3261e;
+  --accent: #c8742b; /* fall orange, used only for small seasonal touches */
+  --accent-soft: rgba(200, 116, 43, 0.22);
   --font: 'Open Sans', system-ui, 'Segoe UI', sans-serif;
 }
 
@@ -158,12 +160,22 @@ h1 {
   font-weight: 600;
 }
 
+/* Footer: a Yale-blue band with an angled top edge and thin "street" stripes in fall orange. */
 .site-footer {
-  border-top: 1px solid var(--border);
-  padding: 1.5rem 2rem;
-  text-align: center;
+  position: relative;
+  margin-top: 3rem;
+  padding: 3rem 2rem 1.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
   font-size: 0.85rem;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.85);
+  background:
+    repeating-linear-gradient(-58deg, transparent 0 22px, var(--accent-soft) 22px 24px),
+    var(--yale-blue);
+  clip-path: polygon(0 28px, 100% 0, 100% 100%, 0 100%);
 }
 
 .button {
@@ -275,6 +287,94 @@ h1 {
 
   .hero-content {
     padding: 1.5rem;
+  }
+}
+
+/* Two angled street-style stripes across the hero's lower right corner. */
+.hero-stripes {
+  position: absolute;
+  right: -40px;
+  bottom: 38px;
+  width: 260px;
+  height: 18px;
+  transform: rotate(-14deg);
+  background: linear-gradient(var(--accent) 0 5px, transparent 5px 11px, rgba(255, 255, 255, 0.85) 11px 14px, transparent 14px);
+  opacity: 0.9;
+}
+
+/* ---------- Seasonal graffiti tag ---------- */
+.seasonal-tag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.hero-banner .seasonal-tag {
+  position: absolute;
+  right: 1.5rem;
+  top: 1.25rem;
+}
+
+.graffiti {
+  font-family: 'Permanent Marker', var(--font);
+  font-size: 1.35rem;
+  color: #fff;
+  transform: rotate(-6deg);
+  text-shadow: 2px 2px 0 var(--accent), 0 0 1px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.02em;
+}
+
+.site-footer .graffiti {
+  font-size: 1.15rem;
+}
+
+/* Three shapes drift down and sway, slowly, then loop. */
+.drift {
+  position: absolute;
+  top: -6px;
+  opacity: 0;
+  animation: drift 7s ease-in-out infinite;
+}
+
+.drift-0 {
+  left: 8%;
+}
+
+.drift-1 {
+  left: 48%;
+  animation-delay: 2.3s;
+}
+
+.drift-2 {
+  left: 86%;
+  animation-delay: 4.6s;
+}
+
+@keyframes drift {
+  0% {
+    opacity: 0;
+    transform: translate(0, -6px) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate(10px, 22px) rotate(120deg);
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-6px, 46px) rotate(260deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drift {
+    animation: none;
+    opacity: 0.9;
   }
 }
 

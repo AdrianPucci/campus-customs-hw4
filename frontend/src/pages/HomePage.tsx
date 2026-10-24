@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import SeasonalTag from '../components/SeasonalTag'
 
 // Muted, looping clip from the Campus Customs ad behind the heading. The poster (the wide
 // crew shot) shows while it loads, and instead of the video for people who prefer less motion.
@@ -11,6 +12,8 @@ export default function HomePage() {
     <section className="hero-banner">
       <video className="hero-media" src={HERO_VIDEO} poster={HERO_POSTER} autoPlay muted loop playsInline aria-hidden="true" />
       <div className="hero-overlay" />
+      <div className="hero-stripes" aria-hidden="true" />
+      <SeasonalTag />
       <div className="hero-content">
         <p className="hero-eyebrow">Officially licensed · Campus Customs</p>
         <h1>Wear the Blue.</h1>

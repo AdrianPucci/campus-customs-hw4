@@ -4,6 +4,7 @@ import ChatWidget from './components/ChatWidget'
 import MatchingProducts from './components/MatchingProducts'
 import NavBar from './components/NavBar'
 import ScrollToTop from './components/ScrollToTop'
+import SeasonalTag from './components/SeasonalTag'
 import AboutPage from './pages/AboutPage'
 import CreateAccountPage from './pages/CreateAccountPage'
 import HomePage from './pages/HomePage'
@@ -31,7 +32,8 @@ export default function App() {
         </Routes>
       </main>
       <footer className="site-footer">
-        © 2026 Yale Bulldog Blue by Campus Customs · Class project, not the real store
+        <span>© 2026 Yale Bulldog Blue by Campus Customs · Class project, not the real store</span>
+        <SeasonalTag />
       </footer>
       {/* New key on log in / log out = fresh chat panel (and the saved chat reloads) */}
       {!checking && <ChatWidget key={user ? `user-${user.id}` : 'guest'} />}
