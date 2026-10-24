@@ -537,3 +537,13 @@ got it. grabbing some coffee i'll be back.. get yours too if you need it.. speed
 **Assistant response:**
 
 Kept working on Prompt 51's docs and commit, then Problem 8, while the user was away.
+
+## Prompt 54
+
+**User prompt:**
+
+one little fix, I typed in what cool sweats shirts things do we have in the store today, can you make the agent aware that store references don't refer to the physical shops just the online store and they can reference just the online store in the answer?
+
+**Assistant response:**
+
+Added to `backend/prompts/prompt.md` (Store information): "the store", "the shop", "in stock", "today" and "do you carry" mean this online store. The agent answers from the online catalogue, can say "in our online store", never mentions physical shops, walk-in stock, hours or pickup, and redirects physical-location questions to the order-help contact. Added a rule for casual spellings ("sweats shirts", "hoodys", "tees"). Testing showed a second issue: a browse search is capped at 30, so "we've got 30 options" undercounted. Added a rule to say "here are 30 of our…" and invite the shopper to narrow it down. Retested the user's exact question: "Here are 30 sweatshirt picks in our online store, from $58–$88… There may be more", with the price range matching the 30 cards. "Can I pick one up at your store on Broadway?" now gets "I can only help with our online store" plus the contact info.
