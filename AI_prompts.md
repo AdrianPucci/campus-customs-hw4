@@ -1021,3 +1021,13 @@ I don't love it. Let
 **Assistant response:**
 
 The message was cut off after "Let", so asked what to change instead of guessing; offered going back to Yale blue or a softer near-black.
+
+## Prompt 102
+
+**User prompt:**
+
+Let's go back to the Yale blue footer.
+
+**Assistant response:**
+
+Set `--footer-bg` back to Yale blue (one token in `frontend/src/index.css`); the area below the footer follows it. Checked in the browser, committed and pushed to the same repo.
