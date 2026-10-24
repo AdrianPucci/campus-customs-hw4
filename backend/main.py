@@ -28,6 +28,9 @@ app = FastAPI(title="Campus Customs API")
 # so the image URL is "/media/" + that path. Only the products folder is served,
 # never data/ itself, or the database file would be downloadable.
 app.mount("/media/products", StaticFiles(directory=DATA_DIR / "products"), name="media")
+# Home page banner (a muted loop cut from the Campus Customs ad), kept in gitignored data/.
+# check_dir=False: the site still starts without it; the page then shows its plain banner.
+app.mount("/media/hero", StaticFiles(directory=DATA_DIR / "hero", check_dir=False), name="hero")
 app.include_router(auth_router)
 
 

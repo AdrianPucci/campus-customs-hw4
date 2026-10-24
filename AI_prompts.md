@@ -659,3 +659,23 @@ can you send the ink to the browser so I can email to myself
 **Assistant response:**
 
 Explained that the shop's link (http://localhost:5173) only works on this computer, because "localhost" means "this machine", so an emailed copy won't open on a phone or another computer. Offered to make it reachable from a phone on the same Wi-Fi (start Vite with `--host` and use the computer's network address) and asked which link they meant.
+
+## Prompt 66
+
+**User prompt:**
+
+One more thing: can we put some cool shot on the shop home page from the video from the last slide? its a little boring.
+
+**Assistant response:**
+
+Found the only video in the class folders, the Campus Customs ad from Homework 3 (`HMW 3/data/videos/ad_humble.mp4`, 9 s, 1080p HEVC), and made an 18-shot contact sheet to choose from. Built a new Home hero: a muted, looping 720p H.264 clip of the ad (about 1 MB, made with ffmpeg) behind a "Wear the Blue." heading, with a dark-blue gradient for readable text, a white "Shop Products" button and a hint pointing to the chat. The poster image is the wide crew shot under the bridge (about 8 s). People who prefer reduced motion see the still instead. Both files are in `data/hero/` (gitignored, like the product photos) and served by FastAPI at `/media/hero` (`main.py`). If they're missing, the banner falls back to plain Yale blue. Removed the old plain hero CSS. Checked in the browser: the video plays (1280x720, looping) and looks right at phone width.
+
+## Prompt 67
+
+**User prompt:**
+
+man, I can't get it to work on my phone.
+
+**Assistant response:**
+
+Explained that `localhost` on a phone means the phone itself. Added a `dev:phone` script (`vite --host`, in `frontend/package.json`) and a launch config, and restarted the front end that way, so it also listens at http://10.66.128.177:5173 (checked: page and API respond). Found the computer is on YaleSecure, which Windows treats as a Public network: campus Wi-Fi usually blocks device-to-device traffic and Windows Firewall blocks incoming connections on Public networks, so the phone likely still can't connect there. Did not change firewall or network settings, which are the user's own security settings. Gave options: try on home Wi-Fi or a phone hotspot (allowing Node.js when Windows asks), or preview phone size in the Browser pane or Chrome's device mode.
