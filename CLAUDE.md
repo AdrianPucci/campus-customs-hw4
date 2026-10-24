@@ -35,7 +35,7 @@ In two terminals:
 - [x] Rate limit on `/api/chat` (done, Problem 9: `backend/safety.py`).
 - [ ] Ask the user for the given accounts' hash iteration count (`LEGACY_ITERATIONS` in `backend/auth.py`).
 - [ ] 15 empty 🛑 Adrian cells in the harness database section (user's own words).
-- [ ] Final: public GitHub repo, push, file-tree problem.
+- [x] Public GitHub repo: https://github.com/AdrianPucci/campus-customs-hw4 (pushed and validated). After later changes: commit, then `git push`.
 
 ## AV style for answer files (`output/harness.md`)
 
