@@ -981,3 +981,23 @@ exacly
 **Assistant response:**
 
 Confirmed: same link, now with the graffiti wall.
+
+## Prompt 98
+
+**User prompt:**
+
+can you widen the graphic so it blends into the angled bottom pieces?
+
+**Assistant response:**
+
+Started on a full-width version; superseded by Prompt 99 before any change was kept.
+
+## Prompt 99
+
+**User prompt:**
+
+not widen, make taller
+
+**Assistant response:**
+
+Made the graffiti wall taller (300 px, 240 px on phones) and ran its bottom under the slanted footer: on the Home page the page has no bottom padding and the footer overlaps the wall by 70 px (`.page:has(.graffiti-strip) + .site-footer`), so the angled band cuts across the graffiti. The tag is centered in the visible part, "New Haven, CT" moved to the top corner, bottom corners squared, and the area below the footer is Yale blue so short pages have no white gap. Checked Home in the browser (overlap 70 px) and that other pages are unchanged. Committed and pushed to the same repo.

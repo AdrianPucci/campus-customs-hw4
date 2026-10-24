@@ -17,6 +17,11 @@
   box-sizing: border-box;
 }
 
+/* Below the footer on short pages: Yale blue, so the footer band just continues. */
+html {
+  background: var(--yale-blue);
+}
+
 body {
   margin: 0;
   font-family: var(--font);
@@ -314,8 +319,9 @@ h1 {
 .graffiti-strip {
   position: relative;
   margin-top: 1rem;
-  height: 150px;
-  border-radius: 10px;
+  height: 300px;
+  padding-bottom: 70px; /* keeps the tag centered in the part the footer doesn't cover */
+  border-radius: 10px 10px 0 0; /* bottom runs under the slanted footer, so no bottom corners */
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -326,6 +332,17 @@ h1 {
   /* fallback pattern if the photo is missing (drawn under the photo) */
   background-image: repeating-linear-gradient(-58deg, transparent 0 22px, var(--accent-soft) 22px 26px);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+/* On the Home page the wall continues down behind the footer's angled top edge:
+   no gap below the page, and the footer overlaps the bottom of the wall. */
+.page:has(.graffiti-strip) {
+  padding-bottom: 0;
+  min-height: 0;
+}
+
+.page:has(.graffiti-strip) + .site-footer {
+  margin-top: -70px;
 }
 
 /* Slight dark wash so the tag pops on a busy wall. */
@@ -347,7 +364,7 @@ h1 {
 .graffiti-credit {
   position: absolute;
   right: 0.75rem;
-  bottom: 0.5rem;
+  top: 0.6rem; /* top corner: the bottom of the wall sits under the footer */
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -906,6 +923,13 @@ h1 {
 
 /* ---------- Chat on phones and small panes: a compact box in the lower right ---------- */
 /* Small enough that the shop page (and the cards the agent finds) stays visible. */
+@media (max-width: 700px) {
+  .graffiti-strip {
+    height: 240px;
+    padding-bottom: 60px;
+  }
+}
+
 @media (max-width: 700px), (max-height: 700px) {
   .chat-widget {
     right: 0.75rem;
