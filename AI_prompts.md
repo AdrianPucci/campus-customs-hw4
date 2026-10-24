@@ -293,3 +293,23 @@ what should I do?
 **Assistant response:**
 
 Gave a short plan for this problem: read the study sheet in the side panel (about 10 minutes), answer the six self-check questions in chat, then write the database section of `output/harness.md` in their own words. Installing a database viewer is optional.
+
+## Prompt 30
+
+**User prompt:**
+
+Show me a few real rows from catalogue, inventory and users.
+
+**Assistant response:**
+
+Showed real rows read straight from the database: three catalogue rows plus the full description and tags for one, all six inventory rows for the Ice Hockey Left Chest Hoodie (M, L and XL sold out), and the three users with password hashes cut off after the salt. Pointed out what each example shows (JSON text, foreign key, sold-out sizes, salt per user).
+
+## Prompt 31
+
+**User prompt:**
+
+where is the side panel? / I don
+
+**Assistant response:**
+
+Opened `notes/database_review.md` in the app's Files pane on the right side of the window, and gave the path for opening it in File Explorer or Notepad as a fallback.
