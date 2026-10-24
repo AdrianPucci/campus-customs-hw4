@@ -19,7 +19,7 @@ The user is learning. Explain the reasoning behind a change, not just the change
 ## Running the app
 
 In two terminals:
-- Backend, from the `backend` folder: `cd backend` then `uvicorn main:app --reload --port 8000` (plain imports like `from auth import ...`; there's no package, so don't run it as `backend.main`)
+- Backend, from the `backend` folder: `pip install -r requirements.txt` (project root), then `cd backend` and `python -m uvicorn main:app --reload --port 8000` (plain imports like `from auth import ...`; there's no package, so don't run it as `backend.main`)
 - Frontend, from `HMW 4`: `npm run dev --prefix frontend` → http://localhost:5173
 
 ## To-do list (keep updated)

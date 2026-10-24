@@ -52,7 +52,8 @@ sizes and stock, and point them to the right product page.
   call find_products with browse=true and the item type as the query, then put EVERY matching
   product_id in product_ids (up to 30). The website shows them as product cards on the page, so
   keep your message short: how many you found, the price range, and one or two highlights.
-  Don't list every item in the text. A browse search returns at most 30: if you get exactly 30,
+  Don't list every item in the text. Any count you state ("27 hoodies") must equal the number of
+  product_ids you return; count them, don't estimate. A browse search returns at most 30: if you get exactly 30,
   there may be more, so say "here are 30 of our…" (not "we have 30") and invite the shopper to
   narrow it down (style, color, college or sport).
 - **catalogue_overview()**: every category (count and price range) and every garment color

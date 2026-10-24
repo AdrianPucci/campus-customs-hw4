@@ -819,3 +819,33 @@ I need to submit the repo url
 **Assistant response:**
 
 Explained the quickest route: the user creates an empty public repository on github.com (signed in there), sends the URL, then the assistant connects it and pushes with git (using the GitHub sign-in already saved in Windows), and the URL is ready to submit.
+
+## Prompt 82
+
+**User prompt:**
+
+I need to not put my personal .env, campus_customs.d, or product images in the GitHub repo. Use .gitignore. Include .env.example with place holders only.
+
+**Assistant response:**
+
+Rewrote `.gitignore` with explicit, commented rules: `.env` and `.env.*` (but `!.env.example`), `campus_customs.db` / `*.db` / `*.sqlite`, `data/`, `products/` and image and video types (except the app-check screenshots), the safety log, dependencies and Office lock files. Verified: `.env`, the database, product photos and hero media are all ignored; `.env.example` is tracked with placeholders only (`your-portkey-api-key`); no forbidden file in any commit. The first key scan falsely reported "FOUND" because the key read as empty (empty text matches everything). A correct check showed `.env` has empty key lines, and the real 28-character key comes from a Windows environment variable; it is in no commit and no file that could be pushed.
+
+## Prompt 83
+
+**User prompt:**
+
+Example [Screenshot of the required repo file tree: hw4/ with AI_prompts.md, requirements.txt, .env.example, .gitignore, README.md, frontend/, backend/ (main.py, agent.py, models.py, tools.py, prompts/prompt.md), output/ (harness.md, design.md, usability.md, app_check.html, app_check_images/, audit_trail.json)]
+
+**Assistant response:**
+
+Matched the repo to the tree: moved `backend/requirements.txt` to the top level and `output/images/app_check/` to `output/app_check_images/` (links in `app_check.html` updated), and added `output/design.md` and `output/usability.md` as drafts of what was built, with 🛑 Adrian slots for the user's notes. Ran 3 real chats through the live site so `output/audit_trail.json` holds real agent activity (find_products; check_stock; the pink question using find_products ×3 + catalogue_overview). That showed the agent said "28 hoodies" while returning 27, so added a prompt rule that any count must equal the products returned. Updated `README.md` and `CLAUDE.md`. The extra backend files (auth, db, safety, chat_history, audit_trail) are kept.
+
+## Prompt 84
+
+**User prompt:**
+
+[Screenshot of the required data/ tree: data/ with campus_customs.db and products/ (images referenced by the catalogue)]
+
+**Assistant response:**
+
+Confirmed the local `data/` folder matches (database + `products/`, plus `hero/` media and the safety log) and that all of it is gitignored.

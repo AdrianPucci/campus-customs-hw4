@@ -1,0 +1,128 @@
+[
+  {
+    "time": "2026-10-24T15:40:46+00:00",
+    "run_id": "0719fee95880",
+    "endpoint": "/api/chat/stream",
+    "shopper": "guest",
+    "viewing_product_id": null,
+    "question": "what hoodies do you have?",
+    "tool_calls": [
+      {
+        "tool": "find_products",
+        "args": {
+          "query": "hoodie",
+          "category": "hoodie",
+          "browse": true
+        }
+      }
+    ],
+    "model_requests": 2,
+    "input_tokens": 8984,
+    "output_tokens": 373,
+    "duration_ms": 4726,
+    "product_ids": [
+      "basic-hoodie-big-yale",
+      "brooks-brothers-double-knit-full-zip-hoodie-yale",
+      "champion-full-zip-hood",
+      "champion-reverse-weave-hoodie-1",
+      "crew-left-chest-hoodie",
+      "district-vit-hoodie-vintage-bulldog",
+      "district-vit-hoodie-vintage-sailor-bulldog",
+      "fencing-left-chest-hoodie",
+      "ice-hockey-left-chest-hoodie",
+      "sailing-left-chest-hoodie",
+      "squash-left-chest-hoodie",
+      "the-forest-school-hoodie",
+      "ua-gameday-double-knit-hood",
+      "volleyball-left-chest-hoodie",
+      "yale-aunt-hoodie",
+      "yale-dad-hoodie",
+      "yale-grandma-hoodie",
+      "yale-grandpa-hoodie",
+      "yale-mom-hoodie",
+      "yale-sports-hoodie-baseball",
+      "yale-sports-hoodie-diving",
+      "yale-sports-hoodie-golf",
+      "yale-sports-hoodie-hockey",
+      "yale-sports-hoodie-soccer",
+      "yale-sports-hoodie-swimming",
+      "yale-sports-hoodie-tennis",
+      "yale-uncle-hoodie"
+    ],
+    "outcome": "ok",
+    "error": null
+  }
+,
+  {
+    "time": "2026-10-24T15:40:50+00:00",
+    "run_id": "5b5725872cc3",
+    "endpoint": "/api/chat/stream",
+    "shopper": "guest",
+    "viewing_product_id": "yale-dad-hoodie",
+    "question": "How many of this hoodie do you have in each size?",
+    "tool_calls": [
+      {
+        "tool": "check_stock",
+        "args": {
+          "product_id": "yale-dad-hoodie"
+        }
+      }
+    ],
+    "model_requests": 2,
+    "input_tokens": 7169,
+    "output_tokens": 98,
+    "duration_ms": 3317,
+    "product_ids": [
+      "yale-dad-hoodie"
+    ],
+    "outcome": "ok",
+    "error": null
+  }
+,
+  {
+    "time": "2026-10-24T15:40:58+00:00",
+    "run_id": "dd890b09788c",
+    "endpoint": "/api/chat/stream",
+    "shopper": "guest",
+    "viewing_product_id": "yale-mom-hoodie",
+    "question": "Do you have this in pink?",
+    "tool_calls": [
+      {
+        "tool": "find_products",
+        "args": {
+          "color": "pink",
+          "category": "hoodie",
+          "browse": true
+        }
+      },
+      {
+        "tool": "find_products",
+        "args": {
+          "color": "pink",
+          "category": "hoodie",
+          "color_anywhere": true,
+          "browse": true
+        }
+      },
+      {
+        "tool": "catalogue_overview",
+        "args": {}
+      },
+      {
+        "tool": "find_products",
+        "args": {
+          "color": "dusty coral",
+          "category": "hoodie",
+          "browse": true
+        }
+      }
+    ],
+    "model_requests": 4,
+    "input_tokens": 15201,
+    "output_tokens": 622,
+    "duration_ms": 8202,
+    "product_ids": [],
+    "outcome": "ok",
+    "error": null
+  }
+]

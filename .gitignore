@@ -1,15 +1,37 @@
-# Course data: never commit the database or product images
-data/
-*.db
+# ---------- Never commit (assignment rule + privacy) ----------
 
-# Secrets
+# Personal secrets: API keys live only in .env on this computer.
+# .env.example (placeholders only) IS committed so others know what to fill in.
 .env
+.env.*
+!.env.example
 
-# Dependencies and build output
+# Course database (users with password hashes, chat history) - anywhere in the project
+campus_customs.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Product images and other course media, plus the whole data/ folder
+data/
+products/
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.mp4
+# ...except the app-check screenshots, which are part of the write-up
+!output/app_check_images/
+!output/app_check_images/**
+
+# Runtime logs that can contain shopper activity
+safety_events.jsonl
+
+# ---------- Dependencies and build output ----------
 node_modules/
 frontend/dist/
 __pycache__/
 .venv/
 
-# Office lock files (e.g. ~$arness.md while harness.md is open in Word)
+# ---------- Office lock files (e.g. ~$arness.md while harness.md is open in Word) ----------
 ~$*

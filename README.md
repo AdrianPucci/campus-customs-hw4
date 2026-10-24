@@ -24,9 +24,13 @@ backend/              FastAPI app + agent (run from this folder)
 frontend/             React + Vite + TypeScript site
 output/
   harness.md          design notes: database, models, tools, safety, specs
-  app_check.html      live test of the running site, with screenshots
+  design.md           look and feel: colors, fonts, layout, seasonal touches
+  usability.md        usability features and why
+  app_check.html      live test of the running site
+  app_check_images/   screenshots linked from app_check.html
   audit_trail.json    agent loop activity (created when the agent runs)
 AI_prompts.md         log of every prompt given to the AI coding assistant
+requirements.txt      Python packages for the backend
 ```
 
 Not in this repo on purpose (see `.gitignore`): `data/` (the `campus_customs.db` database,
@@ -38,8 +42,8 @@ product photos and home-page media) and `.env` (API keys).
 2. Copy `.env.example` to `.env` and fill in your Portkey key.
 3. Backend:
    ```
+   pip install -r requirements.txt      # from the project root
    cd backend
-   pip install -r requirements.txt
    python -m uvicorn main:app --reload --port 8000
    ```
 4. Front end (second terminal, project root):
