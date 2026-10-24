@@ -971,3 +971,13 @@ Nice! can you keep the same link on git hub?
 **Assistant response:**
 
 Pushed the local commits (prompt log entries and the original graffiti wall) to the same repo, so the link is unchanged, and noted that GitHub shows these commits as made after the submission. Checked the live repo afterwards.
+
+## Prompt 97
+
+**User prompt:**
+
+exacly
+
+**Assistant response:**
+
+Confirmed: same link, now with the graffiti wall.
