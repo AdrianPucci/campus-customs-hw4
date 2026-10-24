@@ -313,3 +313,13 @@ where is the side panel? / I don
 **Assistant response:**
 
 Opened `notes/database_review.md` in the app's Files pane on the right side of the window, and gave the path for opening it in File Explorer or Notepad as a fallback.
+
+## Prompt 32
+
+**User prompt:**
+
+can we create the output/ harness.md file for me to put my answers into? Or should it go somewhere else?
+
+**Assistant response:**
+
+Confirmed `output/harness.md` is the right place (same as Homework 2 and 3). Created it as a blank template: a Database section with a table for each of `catalogue`, `inventory`, `users` (and optional `chat_messages`) listing every field with an empty "Why it matters" column for the user to fill in, plus empty Models, Tools, Safety and Specs sections for later problems. Opened it in the Files pane.
