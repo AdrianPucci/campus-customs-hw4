@@ -1,7 +1,10 @@
 """The shop chatbot: a PydanticAI agent whose model calls go through Portkey."""
 import os
+import time
+import uuid
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -13,10 +16,12 @@ from pydantic_ai.messages import (
 )
 from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_ai.exceptions import UsageLimitExceeded
 from pydantic_ai.usage import UsageLimits
 
+from audit_trail import append_entry, tool_calls_from
 from models import (
-    CatalogueOverview, Category, ChatTurn, ProductInfo, ProductSummary, ShopperProfile, ShopReply, SortBy,
+    AuditEntry, CatalogueOverview, Category, ChatTurn, ProductInfo, ProductSummary, ShopperProfile, ShopReply, SortBy,
     StockReport,
 )
 from tools import catalogue_overview as get_catalogue_overview
@@ -175,13 +180,41 @@ def to_model_history(history: list[ChatTurn]) -> list[ModelMessage]:
     return messages
 
 
+def _audit(endpoint: str, message: str, shopper: ShopperDeps, started: float, result=None, error: Exception | None = None) -> None:
+    """One audit_trail.json entry per run: tools called, tokens, time and outcome."""
+    usage = result.usage if result is not None else None  # a property in this PydanticAI version
+    outcome = "ok" if error is None else ("request_limit" if isinstance(error, UsageLimitExceeded) else "error")
+    append_entry(AuditEntry(
+        time=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        run_id=uuid.uuid4().hex[:12],
+        endpoint=endpoint,
+        shopper=f"user:{shopper.user_id}" if shopper.logged_in else "guest",
+        viewing_product_id=shopper.viewing_product_id,
+        question=message,  # already redacted by safety.py
+        tool_calls=tool_calls_from(result.all_messages()) if result is not None else [],
+        model_requests=usage.requests if usage else 0,
+        input_tokens=usage.input_tokens if usage else 0,
+        output_tokens=usage.output_tokens if usage else 0,
+        duration_ms=int((time.perf_counter() - started) * 1000),
+        product_ids=list(result.output.product_ids) if result is not None else [],
+        outcome=outcome,
+        error=type(error).__name__ if error else None,
+    ))
+
+
 async def ask_shop_agent(message: str, history: list[ChatTurn], shopper: ShopperDeps) -> ShopReply:
-    result = await shop_agent.run(
-        message,
-        message_history=to_model_history(history),
-        deps=shopper,
-        usage_limits=UsageLimits(request_limit=MAX_MODEL_REQUESTS),
-    )
+    started = time.perf_counter()
+    try:
+        result = await shop_agent.run(
+            message,
+            message_history=to_model_history(history),
+            deps=shopper,
+            usage_limits=UsageLimits(request_limit=MAX_MODEL_REQUESTS),
+        )
+    except Exception as error:
+        _audit("/api/chat", message, shopper, started, error=error)
+        raise
+    _audit("/api/chat", message, shopper, started, result=result)
     return result.output
 
 
@@ -200,15 +233,21 @@ async def stream_shop_agent(
 ) -> AsyncIterator[str | ShopReply]:
     """Same as ask_shop_agent, but yields a status line as each tool starts, then the ShopReply."""
     yield "💭 Thinking about your question…"
-    async with shop_agent.run_stream_events(
-        message,
-        message_history=to_model_history(history),
-        deps=shopper,
-        usage_limits=UsageLimits(request_limit=MAX_MODEL_REQUESTS),
-    ) as events:
-        async for event in events:
-            if isinstance(event, FunctionToolCallEvent):
-                yield TOOL_STATUS.get(event.part.tool_name, "⚙️ Working on it…")
-            elif isinstance(event, AgentRunResultEvent):
-                yield "✍️ Writing your answer…"
-                yield event.result.output
+    started = time.perf_counter()
+    try:
+        async with shop_agent.run_stream_events(
+            message,
+            message_history=to_model_history(history),
+            deps=shopper,
+            usage_limits=UsageLimits(request_limit=MAX_MODEL_REQUESTS),
+        ) as events:
+            async for event in events:
+                if isinstance(event, FunctionToolCallEvent):
+                    yield TOOL_STATUS.get(event.part.tool_name, "⚙️ Working on it…")
+                elif isinstance(event, AgentRunResultEvent):
+                    _audit("/api/chat/stream", message, shopper, started, result=event.result)
+                    yield "✍️ Writing your answer…"
+                    yield event.result.output
+    except Exception as error:
+        _audit("/api/chat/stream", message, shopper, started, error=error)
+        raise

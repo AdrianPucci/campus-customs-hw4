@@ -123,6 +123,33 @@ class ChatHistoryResponse(BaseModel):
     messages: list[HistoryMessage]
 
 
+# ---------- Audit trail (one entry per agent run, appended to output/audit_trail.json) ----------
+
+class ToolCallRecord(BaseModel):
+    tool: str
+    args: dict
+
+
+class AuditEntry(BaseModel):
+    """What the agent loop did for one shopper message. No names or emails; the question is
+    stored after redaction, so card numbers and passwords never reach this file."""
+
+    time: str = Field(description="UTC time the run finished, ISO 8601.")
+    run_id: str
+    endpoint: Literal["/api/chat", "/api/chat/stream"]
+    shopper: str = Field(description='"user:<id>" or "guest"')
+    viewing_product_id: str | None
+    question: str
+    tool_calls: list[ToolCallRecord]
+    model_requests: int
+    input_tokens: int
+    output_tokens: int
+    duration_ms: int
+    product_ids: list[str]
+    outcome: Literal["ok", "request_limit", "error"]
+    error: str | None = None
+
+
 # ---------- Who is chatting (passed to the agent as deps) ----------
 
 class ShopperProfile(BaseModel):

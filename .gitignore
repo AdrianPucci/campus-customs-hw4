@@ -10,3 +10,6 @@ node_modules/
 frontend/dist/
 __pycache__/
 .venv/
+
+# Office lock files (e.g. ~$arness.md while harness.md is open in Word)
+~$*

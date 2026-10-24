@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus Customs App Check</title>
+<style>
+  :root {
+    --yale: #00356b; --text: #1d1d1d; --muted: #5f6368; --bg: #ffffff; --surface: #f5f6f8;
+    --border: #e3e5e8; --pass: #1e7b34; --pass-bg: #e6f4ea; --accent: #c8742b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --yale: #8db8ea; --text: #e8eaed; --muted: #a8adb4; --bg: #15181c; --surface: #1f2329;
+      --border: #333941; --pass: #7fd193; --pass-bg: #1c3324;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Open Sans", system-ui, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); line-height: 1.55; }
+  main { max-width: 980px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { color: var(--yale); margin: 0 0 4px; font-size: 2rem; }
+  h2 { color: var(--yale); margin: 40px 0 8px; font-size: 1.35rem; border-bottom: 2px solid var(--yale); padding-bottom: 6px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 20px 0; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .tile b { display: block; font-size: 0.95rem; }
+  .badge { display: inline-block; background: var(--pass-bg); color: var(--pass); font-weight: 700; font-size: 0.78rem; border-radius: 999px; padding: 2px 10px; margin-top: 6px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--surface); width: 26%; }
+  code { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 0.88em; }
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  figure { margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+  figure img { width: 100%; height: auto; display: block; border-radius: 4px; }
+  figcaption { font-size: 0.82rem; color: var(--muted); margin-top: 8px; }
+  ul { padding-left: 20px; }
+  .note { border-left: 4px solid var(--accent); background: var(--surface); padding: 10px 14px; border-radius: 4px; font-size: 0.92rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Campus Customs App Check</h1>
+  <p class="sub">Live test of the running site · Oct 24, 2026 · frontend <code>http://localhost:5173</code> (React + Vite) · backend <code>http://localhost:8000</code> (FastAPI + PydanticAI agent on Portkey, <code>gpt-6-luna</code>) · data from <code>data/campus_customs.db</code></p>
+
+  <div class="summary">
+    <div class="tile"><b>1. Inventory levels of an item</b>Chat and product page match the database for every size.<br><span class="badge">PASS</span></div>
+    <div class="tile"><b>2. Dynamic search result cards</b>"What hoodies do you have?" put all 27 hoodies on the page as cards.<br><span class="badge">PASS</span></div>
+    <div class="tile"><b>3. Usability: suggestions + live status</b>Seasonal chips appear; the chat shows the agent's real steps while it works.<br><span class="badge">PASS</span></div>
+  </div>
+
+  <p class="note">How it was tested: I used the site in the built-in browser like a shopper (clicking, typing in the chat), then checked every number against the database with a direct SQL query. Screenshots are from a phone-width window (about 420 px), which also shows the compact chat panel.</p>
+
+  <h2>1. Inventory levels of an item</h2>
+  <table>
+    <tr><th>Steps</th><td>Opened the <b>Yale Dad Hoodie</b> page, opened the chat and asked: <i>"How many of this hoodie do you have in each size?"</i></td></tr>
+    <tr><th>What the agent did</th><td>Knew "this hoodie" from the open page (page context), then called <code>check_stock</code>, which reads the <code>inventory</code> table.</td></tr>
+    <tr><th>Chat answer</th><td>"The Yale Dad Hoodie has: XS 5, S 5, M 12, L 20, XL 12, and XXL 15 in stock."</td></tr>
+    <tr><th>Product page</th><td>Sizes &amp; stock boxes: XS 5 · S 5 · M 12 · L 20 · XL 12 · XXL 15</td></tr>
+    <tr><th>Database</th><td><code>SELECT size, quantity FROM inventory WHERE product_id = 'yale-dad-hoodie'</code> → XS 5, S 5, M 12, L 20, XL 12, XXL 15</td></tr>
+    <tr><th>Result</th><td><span class="badge">PASS</span> All three agree for all six sizes.</td></tr>
+  </table>
+  <div class="shots">
+    <figure><img src="images/app_check/1a_stock_chat.jpg" alt="Chat answering stock per size for the Yale Dad Hoodie"><figcaption>Chat answer with the product card, on the Yale Dad Hoodie page.</figcaption></figure>
+    <figure><img src="images/app_check/1b_stock_page.jpg" alt="Product page showing stock for each size"><figcaption>The product page's own size boxes show the same numbers.</figcaption></figure>
+  </div>
+
+  <h2>2. Dynamic search result cards</h2>
+  <table>
+    <tr><th>Steps</th><td>From the Home page, asked the chat: <i>"what hoodies do you have?"</i></td></tr>
+    <tr><th>What happened</th><td>The agent searched in browse mode (<code>find_products</code>, category hoodie, up to 30) and returned the matching product ids. The backend turned them into cards from the database, and a <b>"From your chat: 27 matching items"</b> section appeared at the top of the page.</td></tr>
+    <tr><th>Cards</th><td>27 cards, each with image, name, price, a short description and sizes in stock. 0 broken images. First cards: Basic Hoodie Big Yale $68, Brooks Brothers Double Knit Full Zip Hoodie $88, Champion Full Zip Hood $88.</td></tr>
+    <tr><th>Database</th><td>27 products in the hoodie category. Every card clicks through to its product page.</td></tr>
+    <tr><th>Result</th><td><span class="badge">PASS</span> The card count matches the catalogue, with no made-up products.</td></tr>
+  </table>
+  <div class="shots">
+    <figure><img src="images/app_check/2_search_cards.jpg" alt="27 matching hoodie cards on the page"><figcaption>"27 matching items" section with full product cards.</figcaption></figure>
+  </div>
+
+  <h2>3. Usability feature: suggestion chips and live status</h2>
+  <table>
+    <tr><th>Suggestion chips</th><td>An empty chat shows <b>🎁 Gift ideas · 🍂 Fall layers · 🏈 Football season</b>. The seasonal and sport chips change with the month (e.g. ❄️ / 🏒 in winter, ⚾ in spring and summer, 🏟️ The Game in November). Tapping one sends its question.</td></tr>
+    <tr><th>Live status</th><td>While the agent works, the chat shows its <b>real</b> current step, streamed from the backend (not a timer): 💭 Thinking → 🔎 Searching the catalogue → 📦 Checking stock → ✍️ Writing your answer, with "Hang tight, your results are almost here! 🐾".</td></tr>
+    <tr><th>Compact phone chat</th><td>On small screens the chat is a 280×340 box in the lower right (about 30% of the screen), so the page and its cards stay visible.</td></tr>
+    <tr><th>Result</th><td><span class="badge">PASS</span></td></tr>
+  </table>
+  <div class="shots">
+    <figure><img src="images/app_check/3a_suggestion_chips.jpg" alt="Chat with seasonal suggestion chips"><figcaption>Seasonal suggestion chips in a fresh chat (October).</figcaption></figure>
+    <figure><img src="images/app_check/3b_live_status.jpg" alt="Chat showing Searching the catalogue status"><figcaption>Live status while the agent searches the catalogue.</figcaption></figure>
+  </div>
+
+  <h2>Also checked today</h2>
+  <ul>
+    <li><b>Safety:</b> a message with a test card number (4242…) had the number removed before the AI saw it; the chat showed "[card number removed]" plus a 🔒 notice within 1 second.</li>
+    <li><b>Rate limit:</b> the 7th guest message within a minute got HTTP 429 with <code>Retry-After: 60</code> and the "Whoa, Bulldog!" message (tested with a stand-in agent).</li>
+    <li><b>Bug found and fixed:</b> Portkey's response cache made a repeated question fail (Azure rejected the cached id). After the fix the same question worked 3 times in a row.</li>
+  </ul>
+</main>
+</body>
+</html>

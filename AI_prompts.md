@@ -739,3 +739,63 @@ I don't want it too busy but just a little something to spice it up.
 **Assistant response:**
 
 Noted: keep the seasonal and urban touches subtle. Built after committing Prompt 70.
+
+## Prompt 74
+
+**User prompt:**
+
+test the live site and document it in outp/app_check.html can you write me a short list so I can recall a few items: 1.   inventory levels of an item, dynamic search reluts cards, one of the useabilty features we added
+
+**Assistant response:**
+
+First finished the seasonal touches from Prompts 72-73 (subtle): a Yale-blue footer band with an angled top edge and faint fall-orange diagonal stripes, two angled orange and white stripes across the hero's corner, and a seasonal graffiti tag ("Boola Boola" with three slowly drifting leaves; snowflakes in winter, petals in spring; still for reduced motion) in `components/SeasonalTag.tsx`. Then tested the live site in the browser and wrote **`output/app_check.html`** with 5 screenshots in `output/images/app_check/`: (1) **inventory levels**: on the Yale Dad Hoodie page, "how many of this hoodie in each size?" gave XS 5 · S 5 · M 12 · L 20 · XL 12 · XXL 15, matching the product page and a SQL query; (2) **dynamic search cards**: "what hoodies do you have?" gave 27 cards (= all 27 hoodies in the database, 0 broken images); (3) **usability**: seasonal suggestion chips and the live agent status, plus the compact phone chat. Also listed the safety and rate-limit checks and the Portkey cache bug fix. Gave the user a short recall list of the three items.
+
+## Prompt 75
+
+**User prompt:**
+
+lets keep an appended only version of output/audit_trail.jason of the agent loop activity.
+
+**Assistant response:**
+
+New `backend/audit_trail.py` and an `AuditEntry` / `ToolCallRecord` model in `models.py`. Every agent run (both `/api/chat` and `/api/chat/stream`, including failed runs) appends one entry to **`output/audit_trail.json`**: time, run id, endpoint, shopper (`user:<id>` or `guest`, no names or emails), open product page, the question after redaction, every tool call with its arguments, model requests, input and output tokens, duration, product ids returned, and outcome (ok / request_limit / error). Append-only: each entry is written just before the closing `]`, so the file stays valid JSON and earlier entries are never rewritten, with a lock for simultaneous chats. Fixed `result.usage` (a property in this PydanticAI version, not a method). Tested with 2 real runs (check_stock for Yale Dad Hoodie size L; find_products for T-shirts under $40 returning 25) and 2 stubbed failures; the file stayed valid JSON and contained no email.
+
+## Prompt 76
+
+**User prompt:**
+
+Then when your done. I want you to put a clip of this below the video graphic [Image of colorful street graffiti on a wall: coral, teal, olive and navy shapes]
+
+**Assistant response:**
+
+Built a graffiti band below the Home video (`components/GraffitiStrip.tsx`). The image pasted mid-task wasn't saved as a file, so the band loads it from `data/hero/new-haven-graffiti.jpg` (gitignored like the other media) and shows Yale blue until the user saves the photo there.
+
+## Prompt 77
+
+**User prompt:**
+
+this is new haven graphiti,
+
+**Assistant response:**
+
+Labeled the band "New Haven, CT".
+
+## Prompt 78
+
+**User prompt:**
+
+and move the boola boola onto the graphiti slide. change the bloola blooa font to this one: showcard gothic
+
+**Assistant response:**
+
+Moved the "Boola Boola" tag off the hero and onto the graffiti band (the footer keeps a small one), and switched the tag font to Showcard Gothic. It's a licensed Microsoft Office font that can't be bundled with the site; it's installed on this computer and used when present, and visitors without it get Bungee, a free Google look-alike. Confirmed in the browser that Showcard Gothic renders. Also added `~$*` to `.gitignore`: Word's lock file `output/~$arness.md` showed that `harness.md` is open in Word, which is why the earlier harness edit failed.
+
+## Prompt 79
+
+**User prompt:**
+
+ok I have two more things. I want to do them then I need to update the harness MD and output files then turn it in.
+
+**Assistant response:**
+
+Committed the work so far and asked for the two remaining items. Reminded the user to close `harness.md` in Word before it's updated.
