@@ -263,3 +263,33 @@ or too late?
 **Assistant response:**
 
 Not too late: the name change already went through. The commit hadn't been pushed, so its author could be rewritten. Only commits already on GitHub are effectively too late to change.
+
+## Prompt 27
+
+**User prompt:**
+
+back to this prompt: I havent reviewed it and can't open the file
+
+**Assistant response:**
+
+Sent `notes/database_review.md` as a file card that opens in the side panel, and gave the full path for opening it in File Explorer. The review and the six self-check questions are still to do before writing the database section of `output/harness.md`.
+
+## Prompt 28
+
+**User prompt:**
+
+[Screenshot of instruction: Look at the database `data/campus_customs.db`]
+
+**Assistant response:**
+
+Explained that a `.db` file can't be opened by double-clicking. It needs a SQLite viewer such as DB Browser for SQLite (free), or the study sheet sent at Prompt 27, which already lists every table and field. Offered to show sample rows from each table in chat.
+
+## Prompt 29
+
+**User prompt:**
+
+what should I do?
+
+**Assistant response:**
+
+Gave a short plan for this problem: read the study sheet in the side panel (about 10 minutes), answer the six self-check questions in chat, then write the database section of `output/harness.md` in their own words. Installing a database viewer is optional.
