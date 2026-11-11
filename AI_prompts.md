@@ -1041,3 +1041,13 @@ can you make the chat button white and blue text so its easier to see?
 **Assistant response:**
 
 Made the floating chat button white with Yale-blue text and a 2 px Yale-blue outline (plus a light blue hover) in `frontend/src/index.css`, so it stands out on white pages and over the blue footer. Checked in the browser, committed and pushed to the same repo.
+
+## Prompt 104
+
+**User prompt:**
+
+https://github.com/AdrianPucci/campus-customs-hw4 here is my link but I can't seem to open the actual shop
+
+**Assistant response:**
+
+Explained that the GitHub link holds the code, not a running website: the shop needs the FastAPI backend, the local `data/` folder (database, photos, video, kept off GitHub on purpose) and the Portkey key. Started both servers on this computer and opened the shop in the Browser pane (products API and home video load). Explained how to run it later, and that putting it online for anyone would mean hosting the backend and database and exposing the API key's spending.
